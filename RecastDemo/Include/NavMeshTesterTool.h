@@ -91,9 +91,14 @@ class NavMeshTesterTool : public SampleTool
 	static const int MAX_STEER_POINTS = 10;
 	float m_steerPoints[MAX_STEER_POINTS*3];
 	int m_steerPointCount;
+    
+    static const int maxResult = 16;
+    dtPolyRef m_resultRef[maxResult];
+    int m_resultCount;
 	
 public:
 	NavMeshTesterTool();
+    ~NavMeshTesterTool();
 
 	virtual int type() { return TOOL_NAVMESH_TESTER; }
 	virtual void init(Sample* sample);
@@ -108,6 +113,10 @@ public:
 
 	void recalc();
 	void drawAgent(const float* pos, float r, float h, float c, const unsigned int col);
+    
+    void resetDoor();
+    void findPoly();
+    void togglePoly();
 };
 
 #endif // NAVMESHTESTERTOOL_H

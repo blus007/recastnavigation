@@ -13,6 +13,8 @@ option(RECASTNAVIGATION_DEMO "Build demo" ON)
 option(RECASTNAVIGATION_TESTS "Build tests" ON)
 option(RECASTNAVIGATION_EXAMPLES "Build examples" ON)
 
+add_definitions(-DDT_POLYREF64=1)
+
 if(MSVC AND BUILD_SHARED_LIBS)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()

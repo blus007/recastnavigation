@@ -29,6 +29,7 @@
 #	include <GL/glu.h>
 #endif
 #include "imgui.h"
+#include "InputGeom.h"
 #include "NavMeshTesterTool.h"
 #include "Sample.h"
 #include "Recast.h"
@@ -234,7 +235,8 @@ NavMeshTesterTool::NavMeshTesterTool() :
 	m_eposSet(false),
 	m_pathIterNum(0),
 	m_pathIterPolyCount(0),
-	m_steerPointCount(0)
+	m_steerPointCount(0),
+    m_resultCount(0)
 {
 	m_filter.setIncludeFlags(SAMPLE_POLYFLAGS_ALL ^ SAMPLE_POLYFLAGS_DISABLED);
 	m_filter.setExcludeFlags(0);
@@ -245,6 +247,11 @@ NavMeshTesterTool::NavMeshTesterTool() :
 	
 	m_neighbourhoodRadius = 2.5f;
 	m_randomRadius = 5.0f;
+}
+
+NavMeshTesterTool::~NavMeshTesterTool()
+{
+    resetDoor();
 }
 
 void NavMeshTesterTool::init(Sample* sample)
@@ -461,8 +468,125 @@ void NavMeshTesterTool::handleMenu()
 		recalc();
 	}
 	imguiUnindent();
+    
+    if (imguiButton("Find door"))
+    {
+        findPoly();
+    }
+    if (imguiButton("Toggle door"))
+    {
+        togglePoly();
+        recalc();
+    }
 
 	imguiSeparator();	
+}
+
+void NavMeshTesterTool::findPoly()
+{
+    if (!m_sample)
+        return;
+    InputGeom* geom = m_sample->getInputGeom();
+    if (!geom)
+        return;
+    dtNavMeshQuery* query = m_sample->getNavMeshQuery();
+    if (!query)
+        return;
+    const dtNavMesh* navMesh = query->getAttachedNavMesh();
+    if (!navMesh)
+        return;
+    if (!geom->getConvexVolumeCount())
+        return;
+    resetDoor();
+    const ConvexVolume* vols = geom->getConvexVolumes();
+    const ConvexVolume& vol = vols[0];
+    float centerPos[3] = {0,0,0};
+    const float* firstVert = &vol.verts[0];
+    float min[3] = {firstVert[0],firstVert[1],firstVert[2]};
+    float max[3] = {firstVert[0],firstVert[1],firstVert[2]};
+    for (int i = 0; i < vol.nverts; ++i)
+    {
+        dtVadd(centerPos,centerPos,&vol.verts[i*3]);
+        dtVmin(min, &vol.verts[i*3]);
+        dtVmax(max, &vol.verts[i*3]);
+    }
+    dtVscale(centerPos,centerPos,1.0f/vol.nverts);
+    float halfExtents[3];
+    for (int i = 0; i < 3; ++i)
+    {
+        halfExtents[i] = (max[i] - min[i]) * 0.5f;
+    }
+    dtQueryFilter filter;
+    filter.setIncludeFlags(SAMPLE_POLYFLAGS_DOOR);
+    m_resultCount = 0;
+    dtPolyRef* resultRef = m_resultRef;
+    memset(resultRef, 0, sizeof(dtPolyRef) * maxResult);
+    int resultCount = 0;
+    dtStatus status = query->queryPolygons(centerPos, halfExtents, &filter, resultRef, &resultCount, maxResult);
+    if (!(status & DT_SUCCESS))
+        return;
+    m_resultCount = resultCount;
+    printf("success");
+}
+
+void NavMeshTesterTool::togglePoly()
+{
+    if (!m_sample)
+        return;
+    InputGeom* geom = m_sample->getInputGeom();
+    if (!geom)
+        return;
+    dtNavMeshQuery* query = m_sample->getNavMeshQuery();
+    if (!query)
+        return;
+    const dtNavMesh* navMesh = query->getAttachedNavMesh();
+    if (!navMesh)
+        return;
+    if (!geom->getConvexVolumeCount())
+        return;
+    for (int i = 0; i < m_resultCount; ++i)
+    {
+        const dtMeshTile* tile = nullptr;
+        const dtPoly* cpoly = nullptr;
+        dtPolyRef polyRef = m_resultRef[i];
+        navMesh->getTileAndPolyByRefUnsafe(polyRef, &tile, &cpoly);
+        dtPoly* poly = (dtPoly*)cpoly;
+        if (poly->flags & SAMPLE_POLYFLAGS_DOOR)
+        {
+            poly->flags ^= SAMPLE_POLYFLAGS_DOOR;
+        }
+        else
+        {
+            poly->flags |= SAMPLE_POLYFLAGS_DOOR;
+        }
+    }
+}
+
+void NavMeshTesterTool::resetDoor()
+{
+    if (!m_sample)
+        return;
+    InputGeom* geom = m_sample->getInputGeom();
+    if (!geom)
+        return;
+    dtNavMeshQuery* query = m_sample->getNavMeshQuery();
+    if (!query)
+        return;
+    const dtNavMesh* navMesh = query->getAttachedNavMesh();
+    if (!navMesh)
+        return;
+    if (!geom->getConvexVolumeCount())
+        return;
+    for (int i = 0; i < m_resultCount; ++i)
+    {
+        const dtMeshTile* tile = nullptr;
+        const dtPoly* cpoly = nullptr;
+        dtPolyRef polyRef = m_resultRef[i];
+        navMesh->getTileAndPolyByRefUnsafe(polyRef, &tile, &cpoly);
+        dtPoly* poly = (dtPoly*)cpoly;
+        poly->flags |= SAMPLE_POLYFLAGS_DOOR;
+    }
+    m_resultCount = 0;
 }
 
 void NavMeshTesterTool::handleClick(const float* /*s*/, const float* p, bool shift)
@@ -674,6 +798,7 @@ void NavMeshTesterTool::reset()
 	memset(m_hitPos, 0, sizeof(m_hitPos));
 	memset(m_hitNormal, 0, sizeof(m_hitNormal));
 	m_distanceToWall = 0;
+    resetDoor();
 }
 
 
