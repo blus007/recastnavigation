@@ -526,10 +526,18 @@ void InputGeom::drawOffMeshConnections(duDebugDraw* dd, bool hilight)
 	dd->depthMask(true);
 }
 
-void InputGeom::addConvexVolume(const float* verts, const int nverts,
+int InputGeom::addConvexVolume(const int id, const float* verts, const int nverts,
 								const float minh, const float maxh, unsigned char area)
 {
 	if (m_volumeCount >= MAX_VOLUMES) return;
+    for (int i = 0; i < m_volumeCount; ++i)
+    {
+        ConvexVolume* v = &m_volumes[i];
+        if (v->id == id)
+        {
+            return ADD_CONVEX_EXIST_ID;
+        }
+    }
 	ConvexVolume* vol = &m_volumes[m_volumeCount++];
 	memset(vol, 0, sizeof(ConvexVolume));
 	memcpy(vol->verts, verts, sizeof(float)*3*nverts);
@@ -537,6 +545,8 @@ void InputGeom::addConvexVolume(const float* verts, const int nverts,
 	vol->hmax = maxh;
 	vol->nverts = nverts;
 	vol->area = area;
+    vol->id = id;
+    return ADD_CONVEX_SUCCESS;
 }
 
 void InputGeom::deleteConvexVolume(int i)

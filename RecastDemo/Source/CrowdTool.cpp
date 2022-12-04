@@ -1077,6 +1077,8 @@ void CrowdTool::handleRenderOverlay(double* proj, double* model, int* view)
 {
 	rcIgnoreUnused(model);
 	rcIgnoreUnused(proj);
+    
+    renderVolumes(m_sample, proj, model, view);
 
 	// Tool help
 	const int h = view[3];

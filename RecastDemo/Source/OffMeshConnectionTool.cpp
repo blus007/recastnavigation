@@ -163,6 +163,8 @@ void OffMeshConnectionTool::handleRenderOverlay(double* proj, double* model, int
 	{
 		imguiDrawText((int)x, (int)(y-25), IMGUI_ALIGN_CENTER, "Start", imguiRGBA(0,0,0,220));
 	}
+    
+    renderVolumes(m_sample, proj, model, view);
 	
 	// Tool help
 	const int h = view[3];

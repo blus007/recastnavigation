@@ -769,7 +769,9 @@ public:
 				m_sample->getTilePos(m_hitPos, tx, ty);
 				m_sample->renderCachedTileOverlay(tx,ty,proj,model,view);
 			}
-		}		
+		}
+        
+        renderVolumes(m_sample, proj, model, view);
 	}
 };
 
@@ -827,7 +829,10 @@ public:
 	virtual void handleStep() {}
 	virtual void handleUpdate(const float /*dt*/) {}
 	virtual void handleRender() {}
-	virtual void handleRenderOverlay(double* /*proj*/, double* /*model*/, int* /*view*/) { }
+	virtual void handleRenderOverlay(double* proj, double* model, int* view)
+    {
+        renderVolumes(m_sample, proj, model, view);
+    }
 };
 
 TempObstacleCreateTool::~TempObstacleCreateTool()

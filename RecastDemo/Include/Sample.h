@@ -85,6 +85,8 @@ struct SampleTool
 	virtual void handleToggle() = 0;
 	virtual void handleStep() = 0;
 	virtual void handleUpdate(const float dt) = 0;
+    
+    void renderVolumes(class Sample* sample, double* proj, double* model, int* view);
 };
 
 struct SampleToolState {

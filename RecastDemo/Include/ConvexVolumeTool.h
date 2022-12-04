@@ -19,6 +19,7 @@
 #ifndef CONVEXVOLUMETOOL_H
 #define CONVEXVOLUMETOOL_H
 
+#include <string>
 #include "Sample.h"
 
 // Tool to create convex volumess for InputGeom
@@ -26,10 +27,20 @@
 class ConvexVolumeTool : public SampleTool
 {
 	Sample* m_sample;
+    int m_creationType;
+    float m_id;
+    bool m_autoIncrId;
+    std::string m_error;
+    
 	int m_areaType;
 	float m_polyOffset;
 	float m_boxHeight;
 	float m_boxDescent;
+    
+    float m_xSize;
+    float m_ySize;
+    float m_zSize;
+    float m_rotation;
 	
 	static const int MAX_PTS = 12;
 	float m_pts[MAX_PTS*3];
@@ -50,6 +61,10 @@ public:
 	virtual void handleUpdate(const float dt);
 	virtual void handleRender();
 	virtual void handleRenderOverlay(double* proj, double* model, int* view);
+    
+private:
+    int addConvexVolume(const int id, const float* verts, const int nverts,
+                        const float minh, const float maxh, unsigned char area);
 };
 
 #endif // CONVEXVOLUMETOOL_H

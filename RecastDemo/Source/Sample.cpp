@@ -23,6 +23,7 @@
 #include "InputGeom.h"
 #include "Recast.h"
 #include "RecastDebugDraw.h"
+#include "DetourCommon.h"
 #include "DetourDebugDraw.h"
 #include "DetourNavMesh.h"
 #include "DetourNavMeshQuery.h"
@@ -30,6 +31,11 @@
 #include "imgui.h"
 #include "SDL.h"
 #include "SDL_opengl.h"
+#ifdef __APPLE__
+#    include <OpenGL/glu.h>
+#else
+#    include <GL/glu.h>
+#endif
 
 #ifdef WIN32
 #	define snprintf _snprintf
@@ -38,6 +44,37 @@
 SampleTool::~SampleTool()
 {
 	// Defined out of line to fix the weak v-tables warning
+}
+
+void SampleTool::renderVolumes(Sample* sample, double* proj, double* model, int* view)
+{
+    GLdouble x, y, z;
+    
+    InputGeom* geom = sample->getInputGeom();
+    if (geom)
+    {
+        int volumeCount = geom->getConvexVolumeCount();
+        if (volumeCount > 0)
+        {
+            char buff[8];
+            const ConvexVolume* vols = geom->getConvexVolumes();
+            for (int i = 0; i < volumeCount; ++i)
+            {
+                const ConvexVolume* vol = &vols[i];
+                const float* verts = vol->verts;
+                const int nverts = vol->nverts;
+                float centerPos[3] = {0,0,0};
+                for (int i = 0; i < nverts; ++i)
+                    dtVadd(centerPos,centerPos,&verts[i*3]);
+                dtVscale(centerPos,centerPos,1.0f/nverts);
+                if (gluProject((GLdouble)centerPos[0], (GLdouble)vol->hmax, (GLdouble)centerPos[2], model, proj, view, &x, &y, &z))
+                {
+                    sprintf(buff, "%d", vol->id);
+                    imguiDrawText((int)x, (int)(y), IMGUI_ALIGN_CENTER, buff, imguiRGBA(0,0,0,220));
+                }
+            }
+        }
+    }
 }
 
 SampleToolState::~SampleToolState()

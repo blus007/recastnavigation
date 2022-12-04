@@ -29,7 +29,11 @@ struct ConvexVolume
 	float hmin, hmax;
 	int nverts;
 	int area;
+    int id;
 };
+
+#define ADD_CONVEX_SUCCESS 0
+#define ADD_CONVEX_EXIST_ID -1
 
 struct BuildSettings
 {
@@ -135,7 +139,7 @@ public:
 	///@{
 	int getConvexVolumeCount() const { return m_volumeCount; }
 	const ConvexVolume* getConvexVolumes() const { return m_volumes; }
-	void addConvexVolume(const float* verts, const int nverts,
+	int addConvexVolume(const int id, const float* verts, const int nverts,
 						 const float minh, const float maxh, unsigned char area);
 	void deleteConvexVolume(int i);
 	void drawConvexVolumes(struct duDebugDraw* dd, bool hilight = false);
