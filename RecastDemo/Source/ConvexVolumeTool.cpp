@@ -46,6 +46,13 @@ enum ConvexCreation
 
 const int sIdMin = 1;
 const int sIdMax = 100;
+const int sBufferMaxSize = 1024;
+const char* sVolumeTag = "Volume:";
+const char* sAreaTag = "\tarea:";
+const char* sHminTag = "\thmin:";
+const char* sHmaxTag = "\thmax:";
+const char* sNvertsTag = "\tnverts:";
+const char* sVertTag = "\t\tvert:";
 
 // Returns true if 'c' is left of line 'a'-'b'.
 inline bool left(const float* a, const float* b, const float* c)
@@ -237,6 +244,16 @@ void ConvexVolumeTool::handleMenu()
 		m_npts = 0;
 		m_nhull = 0;
 	}
+    
+    if (imguiButton("Save"))
+    {
+        save();
+    }
+    
+    if (imguiButton("Load"))
+    {
+        load();
+    }
 }
 
 void ConvexVolumeTool::handleClick(const float* /*s*/, const float* p, bool shift)
@@ -472,4 +489,202 @@ void ConvexVolumeTool::handleRenderOverlay(double* proj, double* model, int* vie
 		imguiDrawText(280, h-40, IMGUI_ALIGN_LEFT, "Click LMB to add new points. Click on the red point to finish the shape.", imguiRGBA(255,255,255,192));	
 		imguiDrawText(280, h-60, IMGUI_ALIGN_LEFT, "The shape will be convex hull of all added points.", imguiRGBA(255,255,255,192));	
 	}	
+}
+
+void ConvexVolumeTool::save()
+{
+    InputGeom* geom = m_sample->getInputGeom();
+    if (!geom)
+        return;
+    auto mesh = geom->getMesh();
+    if (!mesh)
+        return;
+    auto& filename = mesh->getFileName();
+    size_t extPos = filename.find_last_of('.');
+    std::string volumePath = filename.substr(0, extPos);
+    volumePath += ".vol";
+    FILE* file = fopen(volumePath.c_str(), "w");
+    const ConvexVolume* volumes = geom->getConvexVolumes();
+    int volumeCount = geom->getConvexVolumeCount();
+    const int maxSize = 1024;
+    char buffer[maxSize];
+    for (int i = 0; i < volumeCount; ++i)
+    {
+        int size = 0;
+        const ConvexVolume* volume = &volumes[i];
+        
+        size = snprintf(buffer, maxSize, "%s%d\n", sVolumeTag, volume->id);
+        fwrite(buffer, 1, size, file);
+        
+        size = snprintf(buffer, maxSize, "%s%d\n", sAreaTag, volume->area);
+        fwrite(buffer, 1, size, file);
+        
+        size = snprintf(buffer, maxSize, "%s%0.6f\n", sHminTag, volume->hmin);
+        fwrite(buffer, 1, size, file);
+        
+        size = snprintf(buffer, maxSize, "%s%0.6f\n", sHmaxTag, volume->hmax);
+        fwrite(buffer, 1, size, file);
+        
+        size = snprintf(buffer, maxSize, "%s%d\n", sNvertsTag, volume->nverts);
+        fwrite(buffer, 1, size, file);
+        
+        for (int j = 0; j < volume->nverts; ++j)
+        {
+            const float* verts = &volume->verts[j * 3];
+            size = snprintf(buffer, maxSize, "%sx:%0.6f,y:%0.6f,z:%0.6f\n", sVertTag, verts[0], verts[1], verts[2]);
+            fwrite(buffer, 1, size, file);
+        }
+    }
+    fclose(file);
+}
+
+int findLine(const char* buffer, int start, int size)
+{
+    for (int i = start; i < size; ++i)
+    {
+        if (buffer[i] == '\n')
+            return i;
+    }
+    return -1;
+}
+
+bool readLine(FILE* file, char*& buffer, int& start, int& size, char*& str, bool& readEnd)
+{
+    while (true)
+    {
+        int linePos = -1;
+        if (size > 0)
+            linePos = findLine(buffer, start, size);
+        if (linePos >= 0 || readEnd)
+        {
+            int stopPos = linePos >= 0 ? linePos : size;
+            int strSize = stopPos - start;
+            int pos = start;
+            start = stopPos;
+            if (strSize <= 0)
+            {
+                if (start < size)
+                {
+                    ++start;
+                    continue;
+                }
+                if (readEnd)
+                    return false;
+            }
+            else
+            {
+                memcpy(str, buffer + pos, strSize);
+            }
+            str[strSize] = 0;
+            return true;
+        }
+        if (start > 0)
+        {
+            char* src = buffer;
+            char* dest = str;
+            int tailSize = size - start;
+            memcpy(dest, src + start, tailSize);
+            buffer = dest;
+            str = src;
+            start = 0;
+            size = tailSize;
+        }
+        const int maxSize = sBufferMaxSize;
+        const int acceptSize = maxSize - size;
+        int count = fread(buffer + size, 1, acceptSize, file);
+        size += count;
+        readEnd = count < acceptSize;
+    }
+    readEnd = true;
+    return false;
+}
+
+void ConvexVolumeTool::load()
+{
+    InputGeom* geom = m_sample->getInputGeom();
+    if (!geom)
+        return;
+    auto mesh = geom->getMesh();
+    if (!mesh)
+        return;
+    auto& filename = mesh->getFileName();
+    size_t extPos = filename.find_last_of('.');
+    std::string volumePath = filename.substr(0, extPos);
+    volumePath += ".vol";
+    FILE* file = fopen(volumePath.c_str(), "r");
+    if (!file)
+        return;
+    geom->clearConvexVolume();
+    const int maxSize = sBufferMaxSize;
+    char buffer1[maxSize];
+    char buffer2[maxSize];
+    char* buffer = buffer1;
+    int bufferPos = 0;
+    int readCount = 0;
+    bool readEnd = false;
+    ConvexVolume volume;
+    volume.id = 0;
+    int vertIndex = 0;
+    const int volumeTagSize = strlen(sVolumeTag);
+    const int areaTagSize = strlen(sAreaTag);
+    const int hminTagSize = strlen(sHminTag);
+    const int hmaxTagSize = strlen(sHmaxTag);
+    const int nvertsTagSize = strlen(sNvertsTag);
+    const int vertTagSize = strlen(sVertTag);
+    const int scanFormatSize = 256;
+    char scanFormat[scanFormatSize];
+    do
+    {
+        char* str = buffer == buffer1 ? buffer2 : buffer1;
+        bool success = readLine(file, buffer, bufferPos, readCount, str, readEnd);
+        if (!success && readEnd)
+            break;
+        if (strncmp(str, sVolumeTag, volumeTagSize) == 0)
+        {
+            if (volume.id)
+            {
+                geom->addConvexVolume(volume.id, volume.verts, volume.nverts, volume.hmin, volume.hmax, (unsigned char)volume.area);
+            }
+            snprintf(scanFormat, scanFormatSize, "%s%%d", sVolumeTag);
+            sscanf(str, scanFormat, &volume.id);
+            vertIndex = 0;
+            continue;
+        }
+        if (strncmp(str, sAreaTag, areaTagSize) == 0)
+        {
+            snprintf(scanFormat, scanFormatSize, "%s%%d", sAreaTag);
+            sscanf(str, scanFormat, &volume.area);
+            continue;
+        }
+        if (strncmp(str, sHminTag, hminTagSize) == 0)
+        {
+            snprintf(scanFormat, scanFormatSize, "%s%%f", sHminTag);
+            sscanf(str, scanFormat, &volume.hmin);
+            continue;
+        }
+        if (strncmp(str, sHmaxTag, hmaxTagSize) == 0)
+        {
+            snprintf(scanFormat, scanFormatSize, "%s%%f", sHmaxTag);
+            sscanf(str, scanFormat, &volume.hmax);
+            continue;
+        }
+        if (strncmp(str, sNvertsTag, nvertsTagSize) == 0)
+        {
+            snprintf(scanFormat, scanFormatSize, "%s%%d", sNvertsTag);
+            sscanf(str, scanFormat, &volume.nverts);
+            continue;
+        }
+        if (strncmp(str, sVertTag, vertTagSize) == 0)
+        {
+            snprintf(scanFormat, scanFormatSize, "%sx:%%f,y:%%f,z:%%f", sVertTag);
+            float* vert = &volume.verts[vertIndex++ * 3];
+            sscanf(str, scanFormat, &vert[0], &vert[1], &vert[2]);
+            continue;
+        }
+    } while (true);
+    if (volume.id)
+    {
+        geom->addConvexVolume(volume.id, volume.verts, volume.nverts, volume.hmin, volume.hmax, (unsigned char)volume.area);
+    }
+    fclose(file);
 }

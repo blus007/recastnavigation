@@ -65,6 +65,8 @@ public:
 private:
     int addConvexVolume(const int id, const float* verts, const int nverts,
                         const float minh, const float maxh, unsigned char area);
+    void save();
+    void load();
 };
 
 #endif // CONVEXVOLUMETOOL_H
