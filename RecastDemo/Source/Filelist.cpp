@@ -76,3 +76,78 @@ void scanDirectory(const string& path, const string& ext, vector<string>& fileli
 	filelist.clear();
 	scanDirectoryAppend(path, ext, filelist);
 }
+
+std::string getFileName(const std::string& filePath)
+{
+    size_t extPos = filePath.find_last_of('.');
+    size_t slash = filePath.find_last_of('/');
+    size_t backslash = filePath.find_last_of('\\');
+    slash = slash == std::string::npos ? backslash : backslash == std::string::npos ? slash : slash > backslash ? slash : backslash;
+    size_t start;
+    if (slash == std::string::npos)
+        start = 0;
+    else
+        start = slash + 1;
+    std::string volumePath = filePath.substr(start, extPos - start);
+    return volumePath;
+}
+
+int findLine(const char* buffer, int start, int size)
+{
+    for (int i = start; i < size; ++i)
+    {
+        if (buffer[i] == '\n')
+            return i;
+    }
+    return -1;
+}
+
+bool readLine(FILE* file, char*& buffer, const int maxSize, int& start, int& size, char*& str, bool& readEnd)
+{
+    while (true)
+    {
+        int linePos = -1;
+        if (size > 0)
+            linePos = findLine(buffer, start, size);
+        if (linePos >= 0 || readEnd)
+        {
+            int stopPos = linePos >= 0 ? linePos : size;
+            int strSize = stopPos - start;
+            int pos = start;
+            start = stopPos;
+            if (strSize <= 0)
+            {
+                if (start < size)
+                {
+                    ++start;
+                    continue;
+                }
+                if (readEnd)
+                    return false;
+            }
+            else
+            {
+                memcpy(str, buffer + pos, strSize);
+            }
+            str[strSize] = 0;
+            return true;
+        }
+        if (start > 0)
+        {
+            char* src = buffer;
+            char* dest = str;
+            int tailSize = size - start;
+            memcpy(dest, src + start, tailSize);
+            buffer = dest;
+            str = src;
+            start = 0;
+            size = tailSize;
+        }
+        const int acceptSize = maxSize - size;
+        int count = fread(buffer + size, 1, acceptSize, file);
+        size += count;
+        readEnd = count < acceptSize;
+    }
+    readEnd = true;
+    return false;
+}

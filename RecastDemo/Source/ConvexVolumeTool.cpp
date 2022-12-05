@@ -31,6 +31,7 @@
 #include "Recast.h"
 #include "RecastDebugDraw.h"
 #include "DetourDebugDraw.h"
+#include "Filelist.h"
 
 #ifdef WIN32
 #	define snprintf _snprintf
@@ -499,15 +500,13 @@ void ConvexVolumeTool::save()
     auto mesh = geom->getMesh();
     if (!mesh)
         return;
-    auto& filename = mesh->getFileName();
-    size_t extPos = filename.find_last_of('.');
-    std::string volumePath = filename.substr(0, extPos);
-    volumePath += ".vol";
-    FILE* file = fopen(volumePath.c_str(), "w");
-    const ConvexVolume* volumes = geom->getConvexVolumes();
-    int volumeCount = geom->getConvexVolumeCount();
     const int maxSize = 1024;
     char buffer[maxSize];
+    std::string volumeName = getFileName(mesh->getFileName());
+    snprintf(buffer, maxSize, "Output/%s.volume", volumeName.c_str());
+    FILE* file = fopen(buffer, "w");
+    const ConvexVolume* volumes = geom->getConvexVolumes();
+    int volumeCount = geom->getConvexVolumeCount();
     for (int i = 0; i < volumeCount; ++i)
     {
         int size = 0;
@@ -538,67 +537,6 @@ void ConvexVolumeTool::save()
     fclose(file);
 }
 
-int findLine(const char* buffer, int start, int size)
-{
-    for (int i = start; i < size; ++i)
-    {
-        if (buffer[i] == '\n')
-            return i;
-    }
-    return -1;
-}
-
-bool readLine(FILE* file, char*& buffer, int& start, int& size, char*& str, bool& readEnd)
-{
-    while (true)
-    {
-        int linePos = -1;
-        if (size > 0)
-            linePos = findLine(buffer, start, size);
-        if (linePos >= 0 || readEnd)
-        {
-            int stopPos = linePos >= 0 ? linePos : size;
-            int strSize = stopPos - start;
-            int pos = start;
-            start = stopPos;
-            if (strSize <= 0)
-            {
-                if (start < size)
-                {
-                    ++start;
-                    continue;
-                }
-                if (readEnd)
-                    return false;
-            }
-            else
-            {
-                memcpy(str, buffer + pos, strSize);
-            }
-            str[strSize] = 0;
-            return true;
-        }
-        if (start > 0)
-        {
-            char* src = buffer;
-            char* dest = str;
-            int tailSize = size - start;
-            memcpy(dest, src + start, tailSize);
-            buffer = dest;
-            str = src;
-            start = 0;
-            size = tailSize;
-        }
-        const int maxSize = sBufferMaxSize;
-        const int acceptSize = maxSize - size;
-        int count = fread(buffer + size, 1, acceptSize, file);
-        size += count;
-        readEnd = count < acceptSize;
-    }
-    readEnd = true;
-    return false;
-}
-
 void ConvexVolumeTool::load()
 {
     InputGeom* geom = m_sample->getInputGeom();
@@ -607,17 +545,15 @@ void ConvexVolumeTool::load()
     auto mesh = geom->getMesh();
     if (!mesh)
         return;
-    auto& filename = mesh->getFileName();
-    size_t extPos = filename.find_last_of('.');
-    std::string volumePath = filename.substr(0, extPos);
-    volumePath += ".vol";
-    FILE* file = fopen(volumePath.c_str(), "r");
-    if (!file)
-        return;
-    geom->clearConvexVolume();
     const int maxSize = sBufferMaxSize;
     char buffer1[maxSize];
     char buffer2[maxSize];
+    std::string volumeName = getFileName(mesh->getFileName());
+    snprintf(buffer1, maxSize, "Output/%s.volume", volumeName.c_str());
+    FILE* file = fopen(buffer1, "r");
+    if (!file)
+        return;
+    geom->clearConvexVolume();
     char* buffer = buffer1;
     int bufferPos = 0;
     int readCount = 0;
@@ -636,7 +572,7 @@ void ConvexVolumeTool::load()
     do
     {
         char* str = buffer == buffer1 ? buffer2 : buffer1;
-        bool success = readLine(file, buffer, bufferPos, readCount, str, readEnd);
+        bool success = readLine(file, buffer, maxSize, bufferPos, readCount, str, readEnd);
         if (!success && readEnd)
             break;
         if (strncmp(str, sVolumeTag, volumeTagSize) == 0)

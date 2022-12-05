@@ -867,6 +867,10 @@ Sample_TempObstacles::~Sample_TempObstacles()
 	dtFreeNavMesh(m_navMesh);
 	m_navMesh = 0;
 	dtFreeTileCache(m_tileCache);
+    
+    delete m_talloc;
+    delete m_tcomp;
+    delete m_tmproc;
 }
 
 void Sample_TempObstacles::handleSettings()
@@ -1400,7 +1404,7 @@ void Sample_TempObstacles::getTilePos(const float* pos, int& tx, int& ty)
 	ty = (int)((pos[2] - bmin[2]) / ts);
 }
 
-static const int TILECACHESET_MAGIC = 'T'<<24 | 'S'<<16 | 'E'<<8 | 'T'; //'TSET';
+static const int TILECACHESET_MAGIC = 'W'<<24 | 'L'<<16 | 'R'<<8 | 'D';
 static const int TILECACHESET_VERSION = 1;
 
 struct TileCacheSetHeader
