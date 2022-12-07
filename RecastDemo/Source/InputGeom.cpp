@@ -529,7 +529,7 @@ void InputGeom::drawOffMeshConnections(duDebugDraw* dd, bool hilight)
 int InputGeom::addConvexVolume(const int id, const float* verts, const int nverts,
 								const float minh, const float maxh, unsigned char area)
 {
-	if (m_volumeCount >= MAX_VOLUMES) return;
+	if (m_volumeCount >= MAX_VOLUMES) return ADD_CONVEX_SUCCESS;
     for (int i = 0; i < m_volumeCount; ++i)
     {
         ConvexVolume* v = &m_volumes[i];
