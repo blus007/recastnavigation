@@ -48,6 +48,7 @@
 #include "RecastAlloc.h"
 #include "RecastAssert.h"
 #include "fastlz.h"
+#include "Filelist.h"
 
 #ifdef WIN32
 #	define snprintf _snprintf
@@ -942,14 +943,14 @@ void Sample_TempObstacles::handleSettings()
 
 	if (imguiButton("Save"))
 	{
-		saveAll("all_tiles_tilecache.bin");
+		saveAll();
 	}
 
 	if (imguiButton("Load"))
 	{
 		dtFreeNavMesh(m_navMesh);
 		dtFreeTileCache(m_tileCache);
-		loadAll("all_tiles_tilecache.bin");
+		loadAll();
 		m_navQuery->init(m_navMesh, 2048);
 	}
 
@@ -1422,11 +1423,22 @@ struct TileCacheTileHeader
 	int dataSize;
 };
 
-void Sample_TempObstacles::saveAll(const char* path)
+void Sample_TempObstacles::saveAll()
 {
+    InputGeom* geom = getInputGeom();
+    if (!geom)
+        return;
+    auto mesh = geom->getMesh();
+    if (!mesh)
+        return;
+    const int maxSize = 1024;
+    char buffer[maxSize];
+    std::string meshName = getFileName(mesh->getFileName());
+    snprintf(buffer, maxSize, "Output/%s_obs_navi.bin", meshName.c_str());
+    
 	if (!m_tileCache) return;
 	
-	FILE* fp = fopen(path, "wb");
+	FILE* fp = fopen(buffer, "wb");
 	if (!fp)
 		return;
 	
@@ -1462,9 +1474,20 @@ void Sample_TempObstacles::saveAll(const char* path)
 	fclose(fp);
 }
 
-void Sample_TempObstacles::loadAll(const char* path)
+void Sample_TempObstacles::loadAll()
 {
-	FILE* fp = fopen(path, "rb");
+    InputGeom* geom = getInputGeom();
+    if (!geom)
+        return;
+    auto mesh = geom->getMesh();
+    if (!mesh)
+        return;
+    const int maxSize = 1024;
+    char buffer[maxSize];
+    std::string meshName = getFileName(mesh->getFileName());
+    snprintf(buffer, maxSize, "Output/%s_obs_navi.bin", meshName.c_str());
+    
+	FILE* fp = fopen(buffer, "rb");
 	if (!fp) return;
 	
 	// Read header.

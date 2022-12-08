@@ -516,6 +516,7 @@ void NavMeshTesterTool::findPoly()
     {
         halfExtents[i] = (max[i] - min[i]) * 0.5f;
     }
+    halfExtents[1] = 1.0f;
     dtQueryFilter filter;
     filter.setIncludeFlags(SAMPLE_POLYFLAGS_DOOR);
     m_resultCount = 0;

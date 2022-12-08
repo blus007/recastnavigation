@@ -12,6 +12,7 @@
 ## Linux exes have no extension
 RecastDemo/Bin/RecastDemo
 RecastDemo/Bin/Tests
+RecastDemo/Bin/Output/*
 
 # Build directory
 RecastDemo/Build

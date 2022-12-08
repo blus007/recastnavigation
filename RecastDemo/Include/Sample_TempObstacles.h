@@ -83,8 +83,8 @@ public:
 	void removeTempObstacle(const float* sp, const float* sq);
 	void clearAllTempObstacles();
 
-	void saveAll(const char* path);
-	void loadAll(const char* path);
+	void saveAll();
+	void loadAll();
 
 private:
 	// Explicitly disabled copy constructor and copy assignment operator.
