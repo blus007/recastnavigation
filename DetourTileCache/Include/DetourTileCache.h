@@ -203,7 +203,21 @@ public:
 		const dtObstacleRef tileMask = ((dtObstacleRef)1<<16)-1;
 		return (unsigned int)(ref & tileMask);
 	}
+
+	inline int getMaxObstacleReqCount()
+	{
+		return MAX_REQUESTS;
+	}
+
+	inline int getAddedObstacleReqCount()
+	{
+		return m_nreqs;
+	}
 	
+	inline int getObstacleReqRemainCount()
+	{
+		return MAX_REQUESTS - m_nreqs;
+	}
 	
 private:
 	// Explicitly disabled copy constructor and copy assignment operator.
@@ -245,7 +259,7 @@ private:
 	ObstacleRequest m_reqs[MAX_REQUESTS];
 	int m_nreqs;
 	
-	static const int MAX_UPDATE = 64;
+	static const int MAX_UPDATE = MAX_REQUESTS * DT_MAX_TOUCHED_TILES;
 	dtCompressedTileRef m_update[MAX_UPDATE];
 	int m_nupdate;
 };
