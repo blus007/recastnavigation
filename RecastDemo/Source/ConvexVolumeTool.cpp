@@ -503,7 +503,7 @@ void ConvexVolumeTool::save()
     const int maxSize = 1024;
     char buffer[maxSize];
     std::string volumeName = getFileName(mesh->getFileName());
-    snprintf(buffer, maxSize, "Output/%s.volume", volumeName.c_str());
+    snprintf(buffer, maxSize, "Output/%s.door", volumeName.c_str());
     FILE* file = fopen(buffer, "w");
     const ConvexVolume* volumes = geom->getConvexVolumes();
     int volumeCount = geom->getConvexVolumeCount();
@@ -549,7 +549,7 @@ void ConvexVolumeTool::load()
     char buffer1[maxSize];
     char buffer2[maxSize];
     std::string volumeName = getFileName(mesh->getFileName());
-    snprintf(buffer1, maxSize, "Output/%s.volume", volumeName.c_str());
+    snprintf(buffer1, maxSize, "Output/%s.door", volumeName.c_str());
     FILE* file = fopen(buffer1, "r");
     if (!file)
         return;
