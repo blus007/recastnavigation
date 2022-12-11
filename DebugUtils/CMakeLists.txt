@@ -1,5 +1,6 @@
+file(GLOB HEADERS Include/*.h)
 file(GLOB SOURCES Source/*.cpp)
-add_library(DebugUtils ${SOURCES})
+add_library(DebugUtils ${HEADERS} ${SOURCES})
 
 add_library(RecastNavigation::DebugUtils ALIAS DebugUtils)
 set_target_properties(DebugUtils PROPERTIES DEBUG_POSTFIX -d)

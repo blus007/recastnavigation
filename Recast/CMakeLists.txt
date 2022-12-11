@@ -1,5 +1,6 @@
+file(GLOB HEADERS Include/*.h)
 file(GLOB SOURCES Source/*.cpp)
-add_library(Recast ${SOURCES})
+add_library(Recast ${HEADERS} ${SOURCES})
 
 add_library(RecastNavigation::Recast ALIAS Recast)
 set_target_properties(Recast PROPERTIES DEBUG_POSTFIX -d)

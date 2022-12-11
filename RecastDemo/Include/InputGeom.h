@@ -142,7 +142,7 @@ public:
 	int addConvexVolume(const int id, const float* verts, const int nverts,
 						 const float minh, const float maxh, unsigned char area);
 	void deleteConvexVolume(int i);
-    void clearConvexVolume() { m_volumeCount = 0; }
+    void deleteConvexVolumes(unsigned char area);
 	void drawConvexVolumes(struct duDebugDraw* dd, bool hilight = false);
 	///@}
 	

@@ -41,8 +41,8 @@
 
 enum ConvexCreation
 {
-    CONVEX_CREATION_ANY,
-    CONVEX_CREATION_BOX,
+    CONVEX_CREATION_REGION,
+    CONVEX_CREATION_DOOR,
 };
 
 const int sIdMin = 1;
@@ -118,7 +118,7 @@ static int pointInPoly(int nvert, const float* verts, const float* p)
 
 ConvexVolumeTool::ConvexVolumeTool() :
 	m_sample(0),
-    m_creationType(CONVEX_CREATION_BOX),
+    m_creationType(CONVEX_CREATION_DOOR),
     m_id(1),
     m_autoIncrId(true),
 	m_areaType(SAMPLE_POLYAREA_DOOR),
@@ -148,15 +148,17 @@ void ConvexVolumeTool::reset()
 void ConvexVolumeTool::handleMenu()
 {
     imguiLabel("Creation Type");
-    if (imguiCheck("Any", m_creationType == CONVEX_CREATION_ANY))
+    if (imguiCheck("Region", m_creationType == CONVEX_CREATION_REGION))
     {
-        m_creationType = CONVEX_CREATION_ANY;
+        m_creationType = CONVEX_CREATION_REGION;
+        m_areaType = SAMPLE_POLYAREA_REGION;
         m_npts = 0;
         m_nhull = 0;
     }
-    if (imguiCheck("Box", m_creationType == CONVEX_CREATION_BOX))
+    if (imguiCheck("Door", m_creationType == CONVEX_CREATION_DOOR))
     {
-        m_creationType = CONVEX_CREATION_BOX;
+        m_creationType = CONVEX_CREATION_DOOR;
+        m_areaType = SAMPLE_POLYAREA_DOOR;
         m_npts = 0;
         m_nhull = 0;
     }
@@ -178,13 +180,13 @@ void ConvexVolumeTool::handleMenu()
         m_id -= 1.0f;
     m_id = m_id < idMin ? idMin : m_id > idMax ? idMax : m_id;
     
-    if (m_creationType == CONVEX_CREATION_ANY)
+    if (m_creationType == CONVEX_CREATION_REGION)
     {
         imguiSlider("Shape Height", &m_boxHeight, 0.1f, 20.0f, 0.1f);
         imguiSlider("Shape Descent", &m_boxDescent, 0.1f, 20.0f, 0.1f);
 //        imguiSlider("Poly Offset", &m_polyOffset, 0.0f, 10.0f, 0.1f);
     }
-	else
+	else if (m_creationType == CONVEX_CREATION_DOOR)
     {
         const float sizeMin = 1.0f;
         const float sizeMax = 100.0f;
@@ -221,24 +223,24 @@ void ConvexVolumeTool::handleMenu()
     }
 
 	imguiSeparator();
+    
+    //    imguiLabel("Area Type");
+    //    imguiIndent();
+    //    if (imguiCheck("Ground", m_areaType == SAMPLE_POLYAREA_GROUND))
+    //        m_areaType = SAMPLE_POLYAREA_GROUND;
+    //    if (imguiCheck("Water", m_areaType == SAMPLE_POLYAREA_WATER))
+    //        m_areaType = SAMPLE_POLYAREA_WATER;
+    //    if (imguiCheck("Road", m_areaType == SAMPLE_POLYAREA_ROAD))
+    //        m_areaType = SAMPLE_POLYAREA_ROAD;
+    //    if (imguiCheck("Door", m_areaType == SAMPLE_POLYAREA_DOOR))
+    //        m_areaType = SAMPLE_POLYAREA_DOOR;
+    //    if (imguiCheck("Grass", m_areaType == SAMPLE_POLYAREA_GRASS))
+    //        m_areaType = SAMPLE_POLYAREA_GRASS;
+    //    if (imguiCheck("Jump", m_areaType == SAMPLE_POLYAREA_JUMP))
+    //        m_areaType = SAMPLE_POLYAREA_JUMP;
+    //    imguiUnindent();
 
-	imguiLabel("Area Type");
-	imguiIndent();
-//    if (imguiCheck("Ground", m_areaType == SAMPLE_POLYAREA_GROUND))
-//        m_areaType = SAMPLE_POLYAREA_GROUND;
-//    if (imguiCheck("Water", m_areaType == SAMPLE_POLYAREA_WATER))
-//        m_areaType = SAMPLE_POLYAREA_WATER;
-//    if (imguiCheck("Road", m_areaType == SAMPLE_POLYAREA_ROAD))
-//        m_areaType = SAMPLE_POLYAREA_ROAD;
-	if (imguiCheck("Door", m_areaType == SAMPLE_POLYAREA_DOOR))
-		m_areaType = SAMPLE_POLYAREA_DOOR;
-//    if (imguiCheck("Grass", m_areaType == SAMPLE_POLYAREA_GRASS))
-//        m_areaType = SAMPLE_POLYAREA_GRASS;
-//    if (imguiCheck("Jump", m_areaType == SAMPLE_POLYAREA_JUMP))
-//        m_areaType = SAMPLE_POLYAREA_JUMP;
-	imguiUnindent();
-
-	imguiSeparator();
+	// imguiSeparator();
 
 	if (imguiButton("Clear Shape"))
 	{
@@ -246,14 +248,21 @@ void ConvexVolumeTool::handleMenu()
 		m_nhull = 0;
 	}
     
-    if (imguiButton("Save"))
+    if (m_creationType == CONVEX_CREATION_REGION)
     {
-        save();
+        
     }
-    
-    if (imguiButton("Load"))
+    else if (m_creationType == CONVEX_CREATION_DOOR)
     {
-        load();
+        if (imguiButton("Save Doors"))
+        {
+            saveDoors();
+        }
+        
+        if (imguiButton("Load Doors"))
+        {
+            loadDoors();
+        }
     }
 }
 
@@ -265,6 +274,16 @@ void ConvexVolumeTool::handleClick(const float* /*s*/, const float* p, bool shif
 	
 	if (shift)
 	{
+        if (m_npts && rcVdistSqr(p, &m_pts[(m_npts-1)*3]) < rcSqr(1.0f))
+        {
+            m_npts--;
+            // Update hull.
+            if (m_npts > 1)
+                m_nhull = convexhull(m_pts, m_npts, m_hull);
+            else
+                m_nhull = 0;
+            return;
+        }
 		// Delete
 		int nearestIndex = -1;
 		const ConvexVolume* vols = geom->getConvexVolumes();
@@ -287,7 +306,7 @@ void ConvexVolumeTool::handleClick(const float* /*s*/, const float* p, bool shif
 		// Create
         int ret = ADD_CONVEX_SUCCESS;
         int id = (int)(m_id + 0.3f);
-        if (m_creationType == CONVEX_CREATION_ANY)
+        if (m_creationType == CONVEX_CREATION_REGION)
         {
             // If clicked on that last pt, create the shape.
             if (m_npts && rcVdistSqr(p, &m_pts[(m_npts-1)*3]) < rcSqr(0.2f))
@@ -336,7 +355,7 @@ void ConvexVolumeTool::handleClick(const float* /*s*/, const float* p, bool shif
                 }
             }
         }
-        else if (m_creationType == CONVEX_CREATION_BOX)
+        else if (m_creationType == CONVEX_CREATION_DOOR)
         {
             /*
              2    1
@@ -487,12 +506,12 @@ void ConvexVolumeTool::handleRenderOverlay(double* proj, double* model, int* vie
 	}
 	else
 	{
-		imguiDrawText(280, h-40, IMGUI_ALIGN_LEFT, "Click LMB to add new points. Click on the red point to finish the shape.", imguiRGBA(255,255,255,192));	
+		imguiDrawText(280, h-40, IMGUI_ALIGN_LEFT, "Click LMB to add new points. Click on the red point to finish the shape. SHIFT+LMB on the red point: delete point.", imguiRGBA(255,255,255,192));
 		imguiDrawText(280, h-60, IMGUI_ALIGN_LEFT, "The shape will be convex hull of all added points.", imguiRGBA(255,255,255,192));	
 	}	
 }
 
-void ConvexVolumeTool::save()
+void ConvexVolumeTool::saveDoors()
 {
     InputGeom* geom = m_sample->getInputGeom();
     if (!geom)
@@ -507,10 +526,23 @@ void ConvexVolumeTool::save()
     FILE* file = fopen(buffer, "w");
     const ConvexVolume* volumes = geom->getConvexVolumes();
     int volumeCount = geom->getConvexVolumeCount();
+    std::vector<int> doorIndices;
     for (int i = 0; i < volumeCount; ++i)
     {
+        if (volumes[i].area != SAMPLE_POLYAREA_DOOR)
+            continue;
+        doorIndices.push_back(i);
+    }
+    std::sort(doorIndices.begin(), doorIndices.end(), [&](int a, int b) {
+        const ConvexVolume* va = volumes + a;
+        const ConvexVolume* vb = volumes + b;
+        return va->id < vb->id;
+    });
+    for (int i = 0; i < doorIndices.size(); ++i)
+    {
         int size = 0;
-        const ConvexVolume* volume = &volumes[i];
+        const int index = doorIndices[i];
+        const ConvexVolume* volume = &volumes[index];
         
         size = snprintf(buffer, maxSize, "%s%d\n", sVolumeTag, volume->id);
         fwrite(buffer, 1, size, file);
@@ -537,7 +569,7 @@ void ConvexVolumeTool::save()
     fclose(file);
 }
 
-void ConvexVolumeTool::load()
+void ConvexVolumeTool::loadDoors()
 {
     InputGeom* geom = m_sample->getInputGeom();
     if (!geom)
@@ -553,7 +585,7 @@ void ConvexVolumeTool::load()
     FILE* file = fopen(buffer1, "r");
     if (!file)
         return;
-    geom->clearConvexVolume();
+    geom->deleteConvexVolumes(SAMPLE_POLYAREA_DOOR);
     char* buffer = buffer1;
     int bufferPos = 0;
     int readCount = 0;

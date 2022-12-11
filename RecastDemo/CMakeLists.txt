@@ -1,3 +1,4 @@
+file(GLOB HEADERS Include/*.h Contrib/fastlz/fastlz.h)
 file(GLOB SOURCES Source/*.cpp Contrib/fastlz/fastlz.c)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
@@ -35,11 +36,11 @@ if(APPLE)
 endif()
 
 if (WIN32)
-    add_executable(RecastDemo WIN32 ${SOURCES})
+    add_executable(RecastDemo WIN32 ${HEADERS} ${SOURCES})
 elseif(APPLE)
-    add_executable(RecastDemo MACOSX_BUNDLE ${SOURCES})
+    add_executable(RecastDemo MACOSX_BUNDLE ${HEADERS} ${SOURCES})
 else()
-    add_executable(RecastDemo ${SOURCES})
+    add_executable(RecastDemo ${HEADERS} ${SOURCES})
 endif()
 
 if( WIN32 )

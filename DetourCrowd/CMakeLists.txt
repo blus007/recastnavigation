@@ -1,5 +1,6 @@
+file(GLOB HEADERS Include/*.h)
 file(GLOB SOURCES Source/*.cpp)
-add_library(DetourCrowd ${SOURCES})
+add_library(DetourCrowd ${HEADERS} ${SOURCES})
 
 add_library(RecastNavigation::DetourCrowd ALIAS DetourCrowd)
 set_target_properties(DetourCrowd PROPERTIES DEBUG_POSTFIX -d)

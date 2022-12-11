@@ -1,5 +1,6 @@
+file(GLOB HEADERS Include/*.h)
 file(GLOB SOURCES Source/*.cpp)
-add_library(DetourTileCache ${SOURCES})
+add_library(DetourTileCache ${HEADERS} ${SOURCES})
 
 add_library(RecastNavigation::DetourTileCache ALIAS DetourTileCache)
 set_target_properties(DetourTileCache PROPERTIES DEBUG_POSTFIX -d)

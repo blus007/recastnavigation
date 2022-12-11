@@ -406,9 +406,12 @@ int Sample_TempObstacles::rasterizeTileLayers(
 	const ConvexVolume* vols = m_geom->getConvexVolumes();
 	for (int i  = 0; i < m_geom->getConvexVolumeCount(); ++i)
 	{
-		rcMarkConvexPolyArea(m_ctx, vols[i].verts, vols[i].nverts,
-							 vols[i].hmin, vols[i].hmax,
-							 (unsigned char)vols[i].area, *rc.chf);
+        if (vols[i].area == SAMPLE_POLYAREA_DOOR)
+        {
+            rcMarkConvexPolyArea(m_ctx, vols[i].verts, vols[i].nverts,
+                                 vols[i].hmin, vols[i].hmax,
+                                 (unsigned char)vols[i].area, *rc.chf);
+        }
 	}
 	
 	rc.lset = rcAllocHeightfieldLayerSet();

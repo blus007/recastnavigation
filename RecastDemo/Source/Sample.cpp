@@ -98,6 +98,8 @@ unsigned int SampleDebugDraw::areaToCol(unsigned int area)
 	case SAMPLE_POLYAREA_GRASS: return duRGBA(0, 255, 0, 255);
 	// Jump : yellow
 	case SAMPLE_POLYAREA_JUMP: return duRGBA(255, 255, 0, 255);
+    // Region : light green 99CC66
+    case SAMPLE_POLYAREA_REGION: return duRGBA(153, 204, 102, 255);
 	// Unexpected : red
 	default: return duRGBA(255, 0, 0, 255);
 	}

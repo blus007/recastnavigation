@@ -533,7 +533,7 @@ int InputGeom::addConvexVolume(const int id, const float* verts, const int nvert
     for (int i = 0; i < m_volumeCount; ++i)
     {
         ConvexVolume* v = &m_volumes[i];
-        if (v->id == id)
+        if (v->area == area && v->id == id)
         {
             return ADD_CONVEX_EXIST_ID;
         }
@@ -552,7 +552,20 @@ int InputGeom::addConvexVolume(const int id, const float* verts, const int nvert
 void InputGeom::deleteConvexVolume(int i)
 {
 	m_volumeCount--;
+    if (i >= m_volumeCount)
+        return;
 	m_volumes[i] = m_volumes[m_volumeCount];
+}
+
+void InputGeom::deleteConvexVolumes(unsigned char area)
+{
+    for (int i = m_volumeCount - 1; i >= 0; --i)
+    {
+        ConvexVolume* volume = m_volumes + i;
+        if (volume->area != area)
+            continue;
+        deleteConvexVolume(i);
+    }
 }
 
 void InputGeom::drawConvexVolumes(struct duDebugDraw* dd, bool /*hilight*/)
