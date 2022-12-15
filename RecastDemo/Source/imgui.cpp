@@ -540,10 +540,15 @@ bool imguiCollapse(const char* text, const char* subtext, bool checked, bool ena
 
 void imguiLabel(const char* text)
 {
-	int x = g_state.widgetX;
-	int y = g_state.widgetY - BUTTON_HEIGHT;
-	g_state.widgetY -= BUTTON_HEIGHT;
-	addGfxCmdText(x, y+BUTTON_HEIGHT/2-TEXT_HEIGHT/2, IMGUI_ALIGN_LEFT, text, imguiRGBA(255,255,255,255));
+    imguiLabel(text, 255, 255, 255, 255);
+}
+
+void imguiLabel(const char* text, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+{
+    int x = g_state.widgetX;
+    int y = g_state.widgetY - BUTTON_HEIGHT;
+    g_state.widgetY -= BUTTON_HEIGHT;
+    addGfxCmdText(x, y+BUTTON_HEIGHT/2-TEXT_HEIGHT/2, IMGUI_ALIGN_LEFT, text, imguiRGBA(r,g,b,a));
 }
 
 void imguiValue(const char* text)

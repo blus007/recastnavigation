@@ -53,6 +53,7 @@ bool imguiItem(const char* text, bool enabled = true);
 bool imguiCheck(const char* text, bool checked, bool enabled = true);
 bool imguiCollapse(const char* text, const char* subtext, bool checked, bool enabled = true);
 void imguiLabel(const char* text);
+void imguiLabel(const char* text, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 void imguiValue(const char* text);
 bool imguiSlider(const char* text, float* val, float vmin, float vmax, float vinc, bool enabled = true);
 

@@ -65,8 +65,27 @@ public:
 private:
     int addConvexVolume(const int id, const float* verts, const int nverts,
                         const float minh, const float maxh, unsigned char area);
-    void saveDoors();
-    void loadDoors();
+    
+    void saveVolumes(SamplePolyAreas area);
+    void loadVolumes(SamplePolyAreas area);
+    
+    inline void saveDoors()
+    {
+        saveVolumes(SAMPLE_POLYAREA_DOOR);
+    }
+    inline void loadDoors()
+    {
+        loadVolumes(SAMPLE_POLYAREA_DOOR);
+    }
+    
+    void saveRegions()
+    {
+        saveVolumes(SAMPLE_POLYAREA_REGION);
+    }
+    void loadRegions()
+    {
+        loadVolumes(SAMPLE_POLYAREA_REGION);
+    }
 };
 
 #endif // CONVEXVOLUMETOOL_H

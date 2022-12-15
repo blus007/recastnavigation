@@ -103,16 +103,30 @@ static int convexhull(const float* pts, int npts, int* out)
 
 static int pointInPoly(int nvert, const float* verts, const float* p)
 {
-	int i, j, c = 0;
-	for (i = 0, j = nvert-1; i < nvert; j = i++)
-	{
-		const float* vi = &verts[i*3];
-		const float* vj = &verts[j*3];
-		if (((vi[2] > p[2]) != (vj[2] > p[2])) &&
-			(p[0] < (vj[0]-vi[0]) * (p[2]-vi[2]) / (vj[2]-vi[2]) + vi[0]) )
-			c = !c;
-	}
-	return c;
+//    int i, j, c = 0;
+//    for (i = 0, j = nvert-1; i < nvert; j = i++)
+//    {
+//        const float* vi = &verts[i*3];
+//        const float* vj = &verts[j*3];
+//        if (((vi[2] > p[2]) != (vj[2] > p[2])) &&
+//            (p[0] < (vj[0]-vi[0]) * (p[2]-vi[2]) / (vj[2]-vi[2]) + vi[0]) )
+//            c = !c;
+//    }
+//    return c;
+    
+    for (int i = 0, j = nvert-1; i < nvert; j = i++)
+    {
+        const float* a = verts + (j * 3);
+        const float* b = verts + (i * 3);
+        const float cx = p[0] - a[0];
+        const float cz = p[2] - a[2];
+        const float bx = b[0] - a[0];
+        const float bz = b[2] - a[2];
+        const float result = cz * bx - cx * bz;
+        if (result <= 0)
+            return 0;
+    }
+    return 1;
 }
 
 
@@ -154,6 +168,7 @@ void ConvexVolumeTool::handleMenu()
         m_areaType = SAMPLE_POLYAREA_REGION;
         m_npts = 0;
         m_nhull = 0;
+        m_error.clear();
     }
     if (imguiCheck("Door", m_creationType == CONVEX_CREATION_DOOR))
     {
@@ -161,12 +176,13 @@ void ConvexVolumeTool::handleMenu()
         m_areaType = SAMPLE_POLYAREA_DOOR;
         m_npts = 0;
         m_nhull = 0;
+        m_error.clear();
     }
     
     imguiSeparator();
     
     if (!m_error.empty())
-        imguiLabel(m_error.c_str());
+        imguiLabel(m_error.c_str(), 255, 255, 0, 255);
     
     if (imguiCheck("Auto increase ID", m_autoIncrId))
         m_autoIncrId = !m_autoIncrId;
@@ -250,7 +266,15 @@ void ConvexVolumeTool::handleMenu()
     
     if (m_creationType == CONVEX_CREATION_REGION)
     {
+        if (imguiButton("Save Regions"))
+        {
+            saveRegions();
+        }
         
+        if (imguiButton("Load Regions"))
+        {
+            loadRegions();
+        }
     }
     else if (m_creationType == CONVEX_CREATION_DOOR)
     {
@@ -335,10 +359,12 @@ void ConvexVolumeTool::handleClick(const float* /*s*/, const float* p, bool shif
                     {
                         ret = addConvexVolume(id, verts, m_nhull, minh, maxh, (unsigned char)m_areaType);
                     }
+                    if (ret == ADD_CONVEX_SUCCESS)
+                    {
+                        m_npts = 0;
+                        m_nhull = 0;
+                    }
                 }
-                
-                m_npts = 0;
-                m_nhull = 0;
             }
             else
             {
@@ -511,7 +537,7 @@ void ConvexVolumeTool::handleRenderOverlay(double* proj, double* model, int* vie
 	}	
 }
 
-void ConvexVolumeTool::saveDoors()
+void ConvexVolumeTool::saveVolumes(SamplePolyAreas area)
 {
     InputGeom* geom = m_sample->getInputGeom();
     if (!geom)
@@ -522,26 +548,39 @@ void ConvexVolumeTool::saveDoors()
     const int maxSize = 1024;
     char buffer[maxSize];
     std::string volumeName = getFileName(mesh->getFileName());
-    snprintf(buffer, maxSize, "Output/%s.door", volumeName.c_str());
+    const char* fileExt = nullptr;
+    switch (area)
+    {
+        case SAMPLE_POLYAREA_DOOR:
+            fileExt = "door";
+            break;
+            
+        case SAMPLE_POLYAREA_REGION:
+            fileExt = "region";
+            break;
+        
+        default: return;
+    }
+    snprintf(buffer, maxSize, "Output/%s.%s", volumeName.c_str(), fileExt);
     FILE* file = fopen(buffer, "w");
     const ConvexVolume* volumes = geom->getConvexVolumes();
     int volumeCount = geom->getConvexVolumeCount();
-    std::vector<int> doorIndices;
+    std::vector<int> indices;
     for (int i = 0; i < volumeCount; ++i)
     {
-        if (volumes[i].area != SAMPLE_POLYAREA_DOOR)
+        if (volumes[i].area != area)
             continue;
-        doorIndices.push_back(i);
+        indices.push_back(i);
     }
-    std::sort(doorIndices.begin(), doorIndices.end(), [&](int a, int b) {
+    std::sort(indices.begin(), indices.end(), [&](int a, int b) {
         const ConvexVolume* va = volumes + a;
         const ConvexVolume* vb = volumes + b;
         return va->id < vb->id;
     });
-    for (int i = 0; i < doorIndices.size(); ++i)
+    for (int i = 0; i < indices.size(); ++i)
     {
         int size = 0;
-        const int index = doorIndices[i];
+        const int index = indices[i];
         const ConvexVolume* volume = &volumes[index];
         
         size = snprintf(buffer, maxSize, "%s%d\n", sVolumeTag, volume->id);
@@ -569,7 +608,7 @@ void ConvexVolumeTool::saveDoors()
     fclose(file);
 }
 
-void ConvexVolumeTool::loadDoors()
+void ConvexVolumeTool::loadVolumes(SamplePolyAreas area)
 {
     InputGeom* geom = m_sample->getInputGeom();
     if (!geom)
@@ -580,12 +619,25 @@ void ConvexVolumeTool::loadDoors()
     const int maxSize = sBufferMaxSize;
     char buffer1[maxSize];
     char buffer2[maxSize];
+    const char* fileExt = nullptr;
+    switch (area)
+    {
+        case SAMPLE_POLYAREA_DOOR:
+            fileExt = "door";
+            break;
+            
+        case SAMPLE_POLYAREA_REGION:
+            fileExt = "region";
+            break;
+            
+        default: return;
+    }
     std::string volumeName = getFileName(mesh->getFileName());
-    snprintf(buffer1, maxSize, "Output/%s.door", volumeName.c_str());
+    snprintf(buffer1, maxSize, "Output/%s.%s", volumeName.c_str(), fileExt);
     FILE* file = fopen(buffer1, "r");
     if (!file)
         return;
-    geom->deleteConvexVolumes(SAMPLE_POLYAREA_DOOR);
+    geom->deleteConvexVolumes(area);
     char* buffer = buffer1;
     int bufferPos = 0;
     int readCount = 0;
