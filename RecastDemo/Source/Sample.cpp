@@ -56,7 +56,8 @@ void SampleTool::renderVolumes(Sample* sample, double* proj, double* model, int*
         int volumeCount = geom->getConvexVolumeCount();
         if (volumeCount > 0)
         {
-            char buff[8];
+            const int BUFF_SIZE = 512;
+            char buff[BUFF_SIZE];
             const ConvexVolume* vols = geom->getConvexVolumes();
             for (int i = 0; i < volumeCount; ++i)
             {
@@ -69,8 +70,43 @@ void SampleTool::renderVolumes(Sample* sample, double* proj, double* model, int*
                 dtVscale(centerPos,centerPos,1.0f/nverts);
                 if (gluProject((GLdouble)centerPos[0], (GLdouble)vol->hmax, (GLdouble)centerPos[2], model, proj, view, &x, &y, &z))
                 {
-                    sprintf(buff, "%d", vol->id);
-                    imguiDrawText((int)x, (int)(y), IMGUI_ALIGN_CENTER, buff, imguiRGBA(0,0,0,220));
+                    const char* areaName = nullptr;
+                    switch (vol->area)
+                    {
+                        case SAMPLE_POLYAREA_DOOR:
+                            areaName = "door";
+                            break;
+                            
+                        case SAMPLE_POLYAREA_REGION:
+                            areaName = "region";
+                            break;
+                            
+                        default:
+                            areaName = "unknow";
+                            break;
+                    }
+                    snprintf(buff, BUFF_SIZE, "%s:%d", areaName, vol->id);
+                    if (vol->linkCount > 0)
+                    {
+                        imguiDrawText((int)x, (int)(y+8), IMGUI_ALIGN_CENTER, buff, imguiRGBA(0,0,0,220));
+                        int size = snprintf(buff, BUFF_SIZE, "%s", "link:");
+                        for (int j = 0; j < vol->linkCount; ++j)
+                        {
+                            if (j)
+                                size += snprintf(buff + size, BUFF_SIZE - size, "%s", ",");
+                            int volumeId = getLinkVolumeId(vol->links[j]);
+                            int doorId = getLinkDoorId(vol->links[j]);
+                            if (doorId > 0)
+                                size += snprintf(buff + size, BUFF_SIZE - size, "%d-%d", volumeId, doorId);
+                            else
+                                size += snprintf(buff + size, BUFF_SIZE - size, "%d", volumeId);
+                        }
+                        imguiDrawText((int)x, (int)(y-8), IMGUI_ALIGN_CENTER, buff, imguiRGBA(0,0,0,220));
+                    }
+                    else
+                    {
+                        imguiDrawText((int)x, (int)(y), IMGUI_ALIGN_CENTER, buff, imguiRGBA(0,0,0,220));
+                    }
                 }
             }
         }

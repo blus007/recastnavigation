@@ -54,6 +54,8 @@ const char* sHminTag = "\thmin:";
 const char* sHmaxTag = "\thmax:";
 const char* sNvertsTag = "\tnverts:";
 const char* sVertTag = "\t\tvert:";
+const char* sNlinkTag = "\tnlink:";
+const char* sLinkTag = "\t\tlink:";
 
 // Returns true if 'c' is left of line 'a'-'b'.
 inline bool left(const float* a, const float* b, const float* c)
@@ -129,11 +131,31 @@ static int pointInPoly(int nvert, const float* verts, const float* p)
     return 1;
 }
 
+static void sortLinks(int* links, int linkSize)
+{
+    if (linkSize < 2)
+        return;
+    for (int i = 0; i < linkSize - 1; ++i)
+    {
+        for (int j = i + 1; j < linkSize; ++j)
+        {
+            int volumeIdI = getLinkVolumeId(links[i]);
+            int volumeIdJ = getLinkVolumeId(links[j]);
+            if (volumeIdI <= volumeIdJ)
+                continue;
+            int tmp = links[i];
+            links[i] = links[j];
+            links[j] = tmp;
+        }
+    }
+}
 
 ConvexVolumeTool::ConvexVolumeTool() :
 	m_sample(0),
     m_creationType(CONVEX_CREATION_DOOR),
     m_id(1),
+    m_linkId(1),
+    m_doorId(0),
     m_autoIncrId(true),
 	m_areaType(SAMPLE_POLYAREA_DOOR),
 	m_polyOffset(0.0f),
@@ -201,6 +223,57 @@ void ConvexVolumeTool::handleMenu()
         imguiSlider("Shape Height", &m_boxHeight, 0.1f, 20.0f, 0.1f);
         imguiSlider("Shape Descent", &m_boxDescent, 0.1f, 20.0f, 0.1f);
 //        imguiSlider("Poly Offset", &m_polyOffset, 0.0f, 10.0f, 0.1f);
+        
+        imguiSeparator();
+        
+        const ConvexVolume* fromVol = findRegion(m_id);
+        const ConvexVolume* toVol = findRegion(m_linkId);
+        if (!fromVol || !toVol || m_id == m_linkId)
+        {
+            imguiButton("Link area", false);
+        }
+        else
+        {
+            bool linked = false;
+            for (int i = 0; i < fromVol->linkCount; ++i)
+            {
+                int volumeId = getLinkVolumeId(fromVol->links[i]);
+                if (volumeId == m_linkId)
+                {
+                    linked = true;
+                    break;
+                }
+            }
+            if (linked)
+            {
+                if (imguiButton("Unlink area"))
+                {
+                    unlinkRegion(m_id, m_linkId, false);
+                }
+            }
+            else
+            {
+                if (imguiButton("Link area"))
+                {
+                    linkRegion(m_id, m_linkId, m_doorId);
+                }
+            }
+        }
+        
+        imguiSlider("Link ID", &m_linkId, idMin, idMax, 1.0f);
+        if (imguiButton("Link ID + 1"))
+            m_linkId += 1.0f;
+        if (imguiButton("Link ID - 1"))
+            m_linkId -= 1.0f;
+        m_linkId = m_linkId < idMin ? idMin : m_linkId > idMax ? idMax : m_linkId;
+        
+        const int doorIdMin = idMin - 1;
+        imguiSlider("Door ID", &m_doorId, doorIdMin, idMax, 1.0f);
+        if (imguiButton("Door ID + 1"))
+            m_doorId += 1.0f;
+        if (imguiButton("Door ID - 1"))
+            m_doorId -= 1.0f;
+        m_doorId = m_doorId < doorIdMin ? doorIdMin : m_doorId > idMax ? idMax : m_doorId;
     }
 	else if (m_creationType == CONVEX_CREATION_DOOR)
     {
@@ -311,17 +384,24 @@ void ConvexVolumeTool::handleClick(const float* /*s*/, const float* p, bool shif
 		// Delete
 		int nearestIndex = -1;
 		const ConvexVolume* vols = geom->getConvexVolumes();
+        const ConvexVolume* vol = nullptr;
 		for (int i = 0; i < geom->getConvexVolumeCount(); ++i)
 		{
 			if (pointInPoly(vols[i].nverts, vols[i].verts, p) &&
 							p[1] >= vols[i].hmin && p[1] <= vols[i].hmax)
 			{
 				nearestIndex = i;
+                vol = vols + i;
 			}
 		}
 		// If end point close enough, delete it.
 		if (nearestIndex != -1)
 		{
+            for (int i = 0; i < vol->linkCount; ++i)
+            {
+                int volumeId = getLinkVolumeId(vol->links[i]);
+                unlinkRegion(vol->id, volumeId, true);
+            }
 			geom->deleteConvexVolume(nearestIndex);
 		}
 	}
@@ -604,6 +684,19 @@ void ConvexVolumeTool::saveVolumes(SamplePolyAreas area)
             size = snprintf(buffer, maxSize, "%sx:%0.6f,y:%0.6f,z:%0.6f\n", sVertTag, verts[0], verts[1], verts[2]);
             fwrite(buffer, 1, size, file);
         }
+        
+        if (volume->linkCount > 0)
+        {
+            size = snprintf(buffer, maxSize, "%s%d\n", sNlinkTag, volume->linkCount);
+            fwrite(buffer, 1, size, file);
+            
+            sortLinks((int*)volume->links, volume->linkCount);
+            for (int j = 0; j < volume->linkCount; ++j)
+            {
+                size = snprintf(buffer, maxSize, "%s%d\n", sLinkTag, volume->links[j]);
+                fwrite(buffer, 1, size, file);
+            }
+        }
     }
     fclose(file);
 }
@@ -645,12 +738,15 @@ void ConvexVolumeTool::loadVolumes(SamplePolyAreas area)
     ConvexVolume volume;
     volume.id = 0;
     int vertIndex = 0;
+    int linkIndex = 0;
     const int volumeTagSize = strlen(sVolumeTag);
     const int areaTagSize = strlen(sAreaTag);
     const int hminTagSize = strlen(sHminTag);
     const int hmaxTagSize = strlen(sHmaxTag);
     const int nvertsTagSize = strlen(sNvertsTag);
     const int vertTagSize = strlen(sVertTag);
+    const int nlinkTagSize = strlen(sNlinkTag);
+    const int linkTagSize = strlen(sLinkTag);
     const int scanFormatSize = 256;
     char scanFormat[scanFormatSize];
     do
@@ -663,11 +759,13 @@ void ConvexVolumeTool::loadVolumes(SamplePolyAreas area)
         {
             if (volume.id)
             {
-                geom->addConvexVolume(volume.id, volume.verts, volume.nverts, volume.hmin, volume.hmax, (unsigned char)volume.area);
+                geom->addConvexVolume(volume.id, volume.verts, volume.nverts, volume.hmin, volume.hmax, (unsigned char)volume.area, volume.linkCount, volume.links);
             }
             snprintf(scanFormat, scanFormatSize, "%s%%d", sVolumeTag);
             sscanf(str, scanFormat, &volume.id);
+            volume.linkCount = 0;
             vertIndex = 0;
+            linkIndex = 0;
             continue;
         }
         if (strncmp(str, sAreaTag, areaTagSize) == 0)
@@ -701,10 +799,168 @@ void ConvexVolumeTool::loadVolumes(SamplePolyAreas area)
             sscanf(str, scanFormat, &vert[0], &vert[1], &vert[2]);
             continue;
         }
+        if (strncmp(str, sNlinkTag, nlinkTagSize) == 0)
+        {
+            snprintf(scanFormat, scanFormatSize, "%s%%d", sNlinkTag);
+            sscanf(str, scanFormat, &volume.linkCount);
+            continue;
+        }
+        if (strncmp(str, sLinkTag, linkTagSize) == 0)
+        {
+            snprintf(scanFormat, scanFormatSize, "%s%%d", sLinkTag);
+            sscanf(str, scanFormat, volume.links + linkIndex);
+            ++linkIndex;
+            continue;
+        }
     } while (true);
     if (volume.id)
     {
-        geom->addConvexVolume(volume.id, volume.verts, volume.nverts, volume.hmin, volume.hmax, (unsigned char)volume.area);
+        geom->addConvexVolume(volume.id, volume.verts, volume.nverts, volume.hmin, volume.hmax, (unsigned char)volume.area, volume.linkCount, volume.links);
     }
     fclose(file);
+}
+
+const ConvexVolume* ConvexVolumeTool::findRegion(int id)
+{
+    InputGeom* geom = m_sample->getInputGeom();
+    if (!geom)
+        return nullptr;
+    ConvexVolume* volumes = (ConvexVolume*)geom->getConvexVolumes();
+    int volumeCount = geom->getConvexVolumeCount();
+    for (int i = 0; i < volumeCount; ++i)
+    {
+        ConvexVolume* volume = volumes + i;
+        if (volume->area != SAMPLE_POLYAREA_REGION)
+            continue;
+        if (volume->id == id)
+        {
+            return volume;
+        }
+    }
+    return nullptr;
+}
+
+void ConvexVolumeTool::linkRegion(int from, int to, int doorId)
+{
+    if (from == to)
+        return;
+    InputGeom* geom = m_sample->getInputGeom();
+    if (!geom)
+        return;
+    ConvexVolume* fromVolume = nullptr;
+    ConvexVolume* toVolume = nullptr;
+    ConvexVolume* volumes = (ConvexVolume*)geom->getConvexVolumes();
+    int volumeCount = geom->getConvexVolumeCount();
+    for (int i = 0; i < volumeCount; ++i)
+    {
+        ConvexVolume* volume = volumes + i;
+        if (volume->area != SAMPLE_POLYAREA_REGION)
+            continue;
+        if (volume->id == from)
+        {
+            fromVolume = volume;
+            if (toVolume)
+                break;
+            continue;
+        }
+        if (volume->id == to)
+        {
+            toVolume = volume;
+            if (fromVolume)
+                break;
+        }
+    }
+    if (!fromVolume)
+    {
+        m_error = "Cannot find from volume";
+        return;
+    }
+    if (!toVolume)
+    {
+        m_error = "Cannot find to volume";
+        return;
+    }
+    m_error = "";
+    for (int i = 0; i < fromVolume->linkCount; ++i)
+    {
+        int volumeId = getLinkVolumeId(fromVolume->links[i]);
+        if (volumeId == to)
+        {
+            m_error = "from volume linked to volume";
+            return;
+        }
+    }
+    for (int i = 0; i < toVolume->linkCount; ++i)
+    {
+        int volumeId = getLinkVolumeId(toVolume->links[i]);
+        if (volumeId == from)
+        {
+            m_error = "to volume linked from volume";
+            return;
+        }
+    }
+    fromVolume->links[fromVolume->linkCount++] = buildLinkId(to, doorId);
+    sortLinks(fromVolume->links, fromVolume->linkCount);
+
+    toVolume->links[toVolume->linkCount++] = buildLinkId(from, doorId);
+    sortLinks(toVolume->links, toVolume->linkCount);
+}
+
+void ConvexVolumeTool::unlinkRegion(int from, int to, bool ignoreFrom)
+{
+    if (from == to)
+        return;
+    InputGeom* geom = m_sample->getInputGeom();
+    if (!geom)
+        return;
+    ConvexVolume* fromVolume = nullptr;
+    ConvexVolume* toVolume = nullptr;
+    ConvexVolume* volumes = (ConvexVolume*)geom->getConvexVolumes();
+    int volumeCount = geom->getConvexVolumeCount();
+    for (int i = 0; i < volumeCount; ++i)
+    {
+        ConvexVolume* volume = volumes + i;
+        if (volume->area != SAMPLE_POLYAREA_REGION)
+            continue;
+        if (volume->id == from)
+        {
+            fromVolume = volume;
+            if (toVolume)
+                break;
+            continue;
+        }
+        if (volume->id == to)
+        {
+            toVolume = volume;
+            if (fromVolume)
+                break;
+        }
+    }
+    if (fromVolume && !ignoreFrom)
+    {
+        for (int i = 0; i < fromVolume->linkCount; ++i)
+        {
+            int volumeId = getLinkVolumeId(fromVolume->links[i]);
+            if (volumeId == to)
+            {
+                fromVolume->links[i] = fromVolume->links[--fromVolume->linkCount];
+                break;
+            }
+        }
+        sortLinks(fromVolume->links, fromVolume->linkCount);
+    }
+    
+    if (toVolume)
+    {
+        for (int i = 0; i < toVolume->linkCount; ++i)
+        {
+            int volumeId = getLinkVolumeId(toVolume->links[i]);
+            if (volumeId == from)
+            {
+                toVolume->links[i] = toVolume->links[--toVolume->linkCount];
+                break;
+            }
+        }
+        sortLinks(toVolume->links, toVolume->linkCount);
+    }
 }

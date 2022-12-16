@@ -23,6 +23,7 @@
 #include "MeshLoaderObj.h"
 
 static const int MAX_CONVEXVOL_PTS = 12;
+static const int MAX_LINKS = 12;
 struct ConvexVolume
 {
 	float verts[MAX_CONVEXVOL_PTS*3];
@@ -30,7 +31,23 @@ struct ConvexVolume
 	int nverts;
 	int area;
     int id;
+    int linkCount;
+    int links[MAX_LINKS];
 };
+inline int buildLinkId(int volumeId, int doorId)
+{
+    return volumeId | (doorId << 16);
+}
+
+inline int getLinkVolumeId(int linkId)
+{
+    return linkId & 0x0000ffff;
+}
+
+inline int getLinkDoorId(int linkId)
+{
+    return (linkId >> 16) & 0x0000ffff;
+}
 
 #define ADD_CONVEX_SUCCESS 0
 #define ADD_CONVEX_EXIST_ID -1
@@ -139,8 +156,14 @@ public:
 	///@{
 	int getConvexVolumeCount() const { return m_volumeCount; }
 	const ConvexVolume* getConvexVolumes() const { return m_volumes; }
+    inline int addConvexVolume(const int id, const float* verts, const int nverts,
+                        const float minh, const float maxh, unsigned char area)
+    {
+        return addConvexVolume(id, verts, nverts, minh, maxh, area, 0, nullptr);
+    }
 	int addConvexVolume(const int id, const float* verts, const int nverts,
-						 const float minh, const float maxh, unsigned char area);
+						 const float minh, const float maxh, unsigned char area,
+                        int linkCount, int* links);
 	void deleteConvexVolume(int i);
     void deleteConvexVolumes(unsigned char area);
 	void drawConvexVolumes(struct duDebugDraw* dd, bool hilight = false);

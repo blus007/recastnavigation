@@ -29,6 +29,8 @@ class ConvexVolumeTool : public SampleTool
 	Sample* m_sample;
     int m_creationType;
     float m_id;
+    float m_linkId;
+    float m_doorId;
     bool m_autoIncrId;
     std::string m_error;
     
@@ -78,14 +80,18 @@ private:
         loadVolumes(SAMPLE_POLYAREA_DOOR);
     }
     
-    void saveRegions()
+    inline void saveRegions()
     {
         saveVolumes(SAMPLE_POLYAREA_REGION);
     }
-    void loadRegions()
+    inline void loadRegions()
     {
         loadVolumes(SAMPLE_POLYAREA_REGION);
     }
+    
+    const struct ConvexVolume* findRegion(int id);
+    void linkRegion(int from, int to, int doorId);
+    void unlinkRegion(int from, int to, bool ignoreFrom);
 };
 
 #endif // CONVEXVOLUMETOOL_H
