@@ -21,6 +21,7 @@
 
 #include "ChunkyTriMesh.h"
 #include "MeshLoaderObj.h"
+#include "AABB.h"
 
 static const int MAX_CONVEXVOL_PTS = 12;
 static const int MAX_LINKS = 12;
@@ -33,6 +34,31 @@ struct ConvexVolume
     int id;
     int linkCount;
     int links[MAX_LINKS];
+    Recast::AABB aabb;
+    
+    const Recast::AABB* GetAABB() const
+    {
+        return &aabb;
+    }
+    
+    void CalcAABB()
+    {
+        float minX = INFINITY;
+        float maxX = -INFINITY;
+        float minZ = INFINITY;
+        float maxZ = -INFINITY;
+        for (int j = 0; j < nverts; ++j)
+        {
+            float x = verts[j * 3];
+            minX = minX < x ? minX : x;
+            maxX = maxX > x ? maxX : x;
+            float z = verts[j * 3 + 2];
+            minZ = minZ < z ? minZ : z;
+            maxZ = maxZ > z ? maxZ : z;
+        }
+        aabb.SetXY(minX, minZ);
+        aabb.SetSize(maxX - minX, maxZ - minZ);
+    }
 };
 inline int buildLinkId(int volumeId, int doorId)
 {

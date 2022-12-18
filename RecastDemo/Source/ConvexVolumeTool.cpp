@@ -32,6 +32,7 @@
 #include "RecastDebugDraw.h"
 #include "DetourDebugDraw.h"
 #include "Filelist.h"
+#include "QuadTree.h"
 
 #ifdef WIN32
 #	define snprintf _snprintf
@@ -56,6 +57,9 @@ const char* sNvertsTag = "\tnverts:";
 const char* sVertTag = "\t\tvert:";
 const char* sNlinkTag = "\tnlink:";
 const char* sLinkTag = "\t\tlink:";
+const char* sRegionTreeTag = "RegionTree:";
+const char* sAABBTag = "\tAABB:";
+const char* sTreeDeepTag = "\tDeep:";
 
 // Returns true if 'c' is left of line 'a'-'b'.
 inline bool left(const float* a, const float* b, const float* c)
@@ -652,11 +656,53 @@ void ConvexVolumeTool::saveVolumes(SamplePolyAreas area)
             continue;
         indices.push_back(i);
     }
-    std::sort(indices.begin(), indices.end(), [&](int a, int b) {
-        const ConvexVolume* va = volumes + a;
-        const ConvexVolume* vb = volumes + b;
-        return va->id < vb->id;
-    });
+    if (indices.empty())
+    {
+        fclose(file);
+        return;
+    }
+    if (indices.size() > 1)
+    {
+        std::sort(indices.begin(), indices.end(), [&](int a, int b) {
+            const ConvexVolume* va = volumes + a;
+            const ConvexVolume* vb = volumes + b;
+            return va->id < vb->id;
+        });
+    }
+    std::vector<Recast::QuadTree<ConvexVolume>::Element*> elems;
+    Recast::QuadTree<ConvexVolume> tree;
+    if (area == SAMPLE_POLYAREA_REGION)
+    {
+        float minX = INFINITY;
+        float maxX = -INFINITY;
+        float minZ = INFINITY;
+        float maxZ = -INFINITY;
+        for (int i = 0; i < indices.size(); ++i)
+        {
+            ConvexVolume* v = (ConvexVolume*)volumes + indices[i];
+            v->CalcAABB();
+            for (int j = 0; j < v->nverts; ++j)
+            {
+                float x = v->verts[j * 3];
+                minX = minX < x ? minX : x;
+                maxX = maxX > x ? maxX : x;
+                float z = v->verts[j * 3 + 2];
+                minZ = minZ < z ? minZ : z;
+                maxZ = maxZ > z ? maxZ : z;
+            }
+        }
+        elems.resize(indices.size());
+        float width = maxX - minX;
+        float height = maxZ - minZ;
+        tree.Init(minX - 1, minZ - 1, width + 1, height + 1);
+        for (int i = 0; i < indices.size(); ++i)
+        {
+            ConvexVolume* v = (ConvexVolume*)volumes + indices[i];
+            elems[i] = tree.Add(v);
+        }
+        int size = snprintf(buffer, maxSize, "%sx=%0.6f,y=%0.6f,width=%0.6f,height=%0.6f\n", sRegionTreeTag, minX, minZ, width, height);
+        fwrite(buffer, 1, size, file);
+    }
     for (int i = 0; i < indices.size(); ++i)
     {
         int size = 0;
@@ -668,6 +714,18 @@ void ConvexVolumeTool::saveVolumes(SamplePolyAreas area)
         
         size = snprintf(buffer, maxSize, "%s%d\n", sAreaTag, volume->area);
         fwrite(buffer, 1, size, file);
+        
+        if (area == SAMPLE_POLYAREA_REGION)
+        {
+            const Recast::AABB* aabb = volume->GetAABB();
+            size = snprintf(buffer, maxSize, "%sx=%0.6f,y=%0.6f,width=%0.6f,height=%0.6f\n", sAABBTag, aabb->GetLeft(), aabb->GetBottom(), aabb->GetWidth(), aabb->GetHeight());
+            fwrite(buffer, 1, size, file);
+            
+            auto* elem = elems[i];
+            auto* node = (Recast::QuadTree<ConvexVolume>::QuadNode*)elem->GetNode();
+            size = snprintf(buffer, maxSize, "%s%d\n", sTreeDeepTag, node->GetDeep());
+            fwrite(buffer, 1, size, file);
+        }
         
         size = snprintf(buffer, maxSize, "%s%0.6f\n", sHminTag, volume->hmin);
         fwrite(buffer, 1, size, file);
@@ -681,7 +739,7 @@ void ConvexVolumeTool::saveVolumes(SamplePolyAreas area)
         for (int j = 0; j < volume->nverts; ++j)
         {
             const float* verts = &volume->verts[j * 3];
-            size = snprintf(buffer, maxSize, "%sx:%0.6f,y:%0.6f,z:%0.6f\n", sVertTag, verts[0], verts[1], verts[2]);
+            size = snprintf(buffer, maxSize, "%sx=%0.6f,y=%0.6f,z=%0.6f\n", sVertTag, verts[0], verts[1], verts[2]);
             fwrite(buffer, 1, size, file);
         }
         
@@ -794,7 +852,7 @@ void ConvexVolumeTool::loadVolumes(SamplePolyAreas area)
         }
         if (strncmp(str, sVertTag, vertTagSize) == 0)
         {
-            snprintf(scanFormat, scanFormatSize, "%sx:%%f,y:%%f,z:%%f", sVertTag);
+            snprintf(scanFormat, scanFormatSize, "%sx=%%f,y=%%f,z=%%f", sVertTag);
             float* vert = &volume.verts[vertIndex++ * 3];
             sscanf(str, scanFormat, &vert[0], &vert[1], &vert[2]);
             continue;
