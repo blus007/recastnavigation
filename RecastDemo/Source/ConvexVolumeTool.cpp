@@ -789,6 +789,11 @@ void ConvexVolumeTool::loadVolumes(SamplePolyAreas area)
     FILE* file = fopen(buffer1, "r");
     if (!file)
         return;
+
+	auto readFunc = [&](char* buffer, int size) {
+		return fread(buffer, 1, size, file);
+	};
+
     geom->deleteConvexVolumes(area);
     char* buffer = buffer1;
     int bufferPos = 0;
@@ -811,7 +816,7 @@ void ConvexVolumeTool::loadVolumes(SamplePolyAreas area)
     do
     {
         char* str = buffer == buffer1 ? buffer2 : buffer1;
-        bool success = readLine(file, buffer, maxSize, bufferPos, readCount, str, readEnd);
+        bool success = readLine(readFunc, buffer, maxSize, bufferPos, readCount, str, readEnd);
         if (!success && readEnd)
             break;
         if (strncmp(str, sVolumeTag, volumeTagSize) == 0)
