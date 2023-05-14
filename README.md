@@ -53,7 +53,8 @@ RecastDemo uses [premake5](http://premake.github.io/) to build platform specific
 
 #### Windows
 
-- Grab the latest SDL2 development library release from [here](https://github.com/libsdl-org/SDL) and unzip it `RecastDemo\Contrib`.  Rename the SDL folder such that the path `RecastDemo\Contrib\SDL\lib\x86` is valid.
+- Grab the latest SDL2 development library(such as SDL2-devel-2.26.5-VC.zip
+) release from [here](https://github.com/libsdl-org/SDL) and unzip it `RecastDemo\Contrib`.  Rename the SDL folder such that the path `RecastDemo\Contrib\SDL\lib\x86` is valid.
 - Navigate to the `RecastDemo` folder and run `premake5 vs2022`
 - Open `Build/vs2022/recastnavigation.sln`.
 - Set `RecastDemo` as the startup project, build, and run.
