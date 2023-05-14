@@ -392,11 +392,13 @@ namespace Recast
             QuadNode* node = (QuadNode*)elem->GetNode();
             if (!node)
             {
-                delete elem;
+				if (del)
+					delete elem;
                 return;
             }
             node->RemoveElem(elem);
-            delete elem;
+			if (del)
+				delete elem;
         }
 
         void Refresh(Element* elem)

@@ -22,6 +22,7 @@
 #include <string.h>
 #include <float.h>
 #include <cmath>
+#include <algorithm>
 #include "SDL.h"
 #include "SDL_opengl.h"
 #include "imgui.h"
