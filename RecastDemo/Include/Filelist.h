@@ -21,11 +21,12 @@
 
 #include <vector>
 #include <string>
+#include <functional>
 
 void scanDirectoryAppend(const std::string& path, const std::string& ext, std::vector<std::string>& fileList);
 void scanDirectory(const std::string& path, const std::string& ext, std::vector<std::string>& fileList);
 
 std::string getFileName(const std::string& filePath);
-bool readLine(FILE* file, char*& buffer, const int maxSize, int& start, int& size, char*& str, bool& readEnd);
+bool readLine(std::function<int(char*, int)> readFunc, char*& buffer, const int maxSize, int& start, int& size, char*& str, bool& readEnd);
 
 #endif // FILELIST_H

@@ -102,7 +102,7 @@ int findLine(const char* buffer, int start, int size)
     return -1;
 }
 
-bool readLine(FILE* file, char*& buffer, const int maxSize, int& start, int& size, char*& str, bool& readEnd)
+bool readLine(std::function<int(char*, int)> readFunc, char*& buffer, const int maxSize, int& start, int& size, char*& str, bool& readEnd)
 {
     while (true)
     {
@@ -144,7 +144,7 @@ bool readLine(FILE* file, char*& buffer, const int maxSize, int& start, int& siz
             size = tailSize;
         }
         const int acceptSize = maxSize - size;
-        int count = fread(buffer + size, 1, acceptSize, file);
+		int count = readFunc(buffer + size, acceptSize);
         size += count;
         readEnd = count < acceptSize;
     }
