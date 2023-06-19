@@ -307,7 +307,7 @@ namespace Recast
         {
             int curDeep = node->GetDeep();
             const AABB* aabb = elem->GetAABB();
-            if ((!aabb || !node->IsContain(*aabb)) && curDeep > 1)
+            if (!aabb || (!node->IsContain(*aabb) && curDeep > 1))
                 return false;
             if (atDeep && atDeep == curDeep)
             {
@@ -381,7 +381,11 @@ namespace Recast
             if (!mRoot)
                 return nullptr;
             Element* elem = new Element(value);
-            Add(mRoot, elem, atDeep);
+			if (!Add(mRoot, elem, atDeep))
+			{
+				delete elem;
+				return nullptr;
+			}
             return elem;
         }
         
