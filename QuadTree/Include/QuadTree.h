@@ -286,6 +286,11 @@ namespace Recast
         {
             return !!mRoot;
         }
+
+		inline QuadNode* GetRoot()
+		{
+			return mRoot;
+		}
         
         void Init(float x, float y, float width, float height)
         {
