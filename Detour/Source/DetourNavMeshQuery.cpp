@@ -1080,7 +1080,7 @@ dtStatus dtNavMeshQuery::findPath(dtPolyRef startRef, dtPolyRef endRef,
 			// If the node is visited the first time, calculate node position.
 			if (neighbourNode->flags == 0)
 			{
-				getEdgeMidPoint(bestRef, bestPoly, bestTile,
+				getNearestPoint(bestRef, bestPoly, bestTile, bestNode->pos,
 								neighbourRef, neighbourPoly, neighbourTile,
 								neighbourNode->pos);
 			}
@@ -1392,7 +1392,7 @@ dtStatus dtNavMeshQuery::updateSlicedFindPath(const int maxIter, int* doneIters)
 			// If the node is visited the first time, calculate node position.
 			if (neighbourNode->flags == 0)
 			{
-				getEdgeMidPoint(bestRef, bestPoly, bestTile,
+				getNearestPoint(bestRef, bestPoly, bestTile, bestNode->pos,
 								neighbourRef, neighbourPoly, neighbourTile,
 								neighbourNode->pos);
 			}
@@ -2365,7 +2365,33 @@ dtStatus dtNavMeshQuery::getEdgeMidPoint(dtPolyRef from, const dtPoly* fromPoly,
 	return DT_SUCCESS;
 }
 
-
+dtStatus dtNavMeshQuery::getNearestPoint(dtPolyRef from, const dtPoly* fromPoly, const dtMeshTile* fromTile, float* fromPt,
+										 dtPolyRef to, const dtPoly* toPoly, const dtMeshTile* toTile, float* toPt) const
+{
+	float left[3], right[3];
+	if (dtStatusFailed(getPortalPoints(from, fromPoly, fromTile, to, toPoly, toTile, left, right)))
+		return DT_FAILURE | DT_INVALID_PARAM;
+	float baseDir[3], ptDir[3];
+	dtVsub(baseDir, right, left);
+	dtVsub(ptDir, fromPt, left);
+	float dotVal = dtVdot(baseDir, ptDir);
+	if (dotVal < 1e-8)
+	{
+		dtVcopy(toPt, left);
+		return DT_SUCCESS;
+	}
+	float dirLen = dtVlen(baseDir);
+	float revDirLen = 1.0f / dirLen;
+	float shadowLen = dotVal * revDirLen;
+	if (shadowLen >= dirLen)
+	{
+		dtVcopy(toPt, right);
+		return DT_SUCCESS;
+	}
+	dtVscale(baseDir, baseDir, revDirLen * shadowLen);
+	dtVadd(toPt, left, baseDir);
+	return DT_SUCCESS;
+}
 
 /// @par
 ///
@@ -3618,7 +3644,7 @@ dtStatus dtNavMeshQuery::findDistanceToWall(dtPolyRef startRef, const float* cen
 			// Cost
 			if (neighbourNode->flags == 0)
 			{
-				getEdgeMidPoint(bestRef, bestPoly, bestTile,
+				getNearestPoint(bestRef, bestPoly, bestTile, bestNode->pos,
 								neighbourRef, neighbourPoly, neighbourTile, neighbourNode->pos);
 			}
 			

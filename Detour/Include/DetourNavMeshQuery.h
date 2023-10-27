@@ -543,6 +543,9 @@ private:
 	dtStatus getEdgeMidPoint(dtPolyRef from, const dtPoly* fromPoly, const dtMeshTile* fromTile,
 							 dtPolyRef to, const dtPoly* toPoly, const dtMeshTile* toTile,
 							 float* mid) const;
+
+	dtStatus getNearestPoint(dtPolyRef from, const dtPoly* fromPoly, const dtMeshTile* fromTile, float* fromPt,
+							 dtPolyRef to, const dtPoly* toPoly, const dtMeshTile* toTile, float* toPt) const;
 	
 	// Appends vertex to a straight path
 	dtStatus appendVertex(const float* pos, const unsigned char flags, const dtPolyRef ref,
