@@ -16,7 +16,8 @@ var Sample_8h =
       [ "SAMPLE_POLYAREA_DOOR", "Sample_8h.html#a588cb37d59e832fa4f2606474769b6daa8dde3ccaff5b35fee2ce73d5744cae9e", null ],
       [ "SAMPLE_POLYAREA_GRASS", "Sample_8h.html#a588cb37d59e832fa4f2606474769b6daaa740ac4d510c2a3abe962fbfb793f1dc", null ],
       [ "SAMPLE_POLYAREA_JUMP", "Sample_8h.html#a588cb37d59e832fa4f2606474769b6daac03a57a3286b6b9f4a5dcc403e269b2e", null ],
-      [ "SAMPLE_POLYAREA_REGION", "Sample_8h.html#a588cb37d59e832fa4f2606474769b6daa58d552de2fbaef2c1766b76591da333c", null ]
+      [ "SAMPLE_POLYAREA_REGION", "Sample_8h.html#a588cb37d59e832fa4f2606474769b6daa58d552de2fbaef2c1766b76591da333c", null ],
+      [ "SAMPLE_POLYAREA_BLOCK", "Sample_8h.html#a588cb37d59e832fa4f2606474769b6daa1d4feb0f36465d298b1bbab8eb8c2059", null ]
     ] ],
     [ "SamplePolyFlags", "Sample_8h.html#a7f96856c3ec53bcd8dab2396ae743f8d", [
       [ "SAMPLE_POLYFLAGS_WALK", "Sample_8h.html#a7f96856c3ec53bcd8dab2396ae743f8da56be2036bea60e03345da8f4897a4682", null ],

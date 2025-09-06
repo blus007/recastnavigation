@@ -144,6 +144,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a5406ae777fad35102d4e125c10c58dc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a47186d0fb6266fbc16f2436813d312ee" id="r_a47186d0fb6266fbc16f2436813d312ee"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRecast_1_1QuadTree.html#a47186d0fb6266fbc16f2436813d312ee">Intersect</a> (<a class="el" href="classRecast_1_1QuadTree_1_1QuadNode.html">QuadNode</a> *node, const <a class="el" href="classRecast_1_1AABB.html">AABB</a> &amp;aabb, const <a class="el" href="classRecast_1_1Circle.html">Circle</a> &amp;circle, std::vector&lt; ValueType * &gt; &amp;output, bool getOne=false)</td></tr>
 <tr class="separator:a47186d0fb6266fbc16f2436813d312ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a16e58a00fb54d22a9064b6b78b58a375" id="r_a16e58a00fb54d22a9064b6b78b58a375"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRecast_1_1QuadTree.html#a16e58a00fb54d22a9064b6b78b58a375">Intersect</a> (const <a class="el" href="classRecast_1_1AABB.html">AABB</a> &amp;circle, std::vector&lt; ValueType * &gt; &amp;output, bool getOne=false)</td></tr>
+<tr class="separator:a16e58a00fb54d22a9064b6b78b58a375"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9dfa36d1bfceadcbc1dabef5958c3a9f" id="r_a9dfa36d1bfceadcbc1dabef5958c3a9f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classRecast_1_1QuadTree.html#a9dfa36d1bfceadcbc1dabef5958c3a9f">Intersect</a> (<a class="el" href="classRecast_1_1QuadTree_1_1QuadNode.html">QuadNode</a> *node, const <a class="el" href="classRecast_1_1AABB.html">AABB</a> &amp;aabb, std::vector&lt; ValueType * &gt; &amp;output, bool getOne=false)</td></tr>
+<tr class="separator:a9dfa36d1bfceadcbc1dabef5958c3a9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ad9e24c277a6c5d6e12b660ee51c6bf42" name="ad9e24c277a6c5d6e12b660ee51c6bf42"></a>
@@ -482,8 +486,52 @@ template&lt;typename ValueType &gt; </div>
 
 </div>
 </div>
+<a id="a16e58a00fb54d22a9064b6b78b58a375" name="a16e58a00fb54d22a9064b6b78b58a375"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a16e58a00fb54d22a9064b6b78b58a375">&#9670;&#160;</a></span>Intersect() <span class="overload">[1/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename ValueType &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classRecast_1_1QuadTree.html">Recast::QuadTree</a>&lt; ValueType &gt;::Intersect </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classRecast_1_1AABB.html">AABB</a> &amp;&#160;</td>
+          <td class="paramname"><em>circle</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; ValueType * &gt; &amp;&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>getOne</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a5406ae777fad35102d4e125c10c58dc9" name="a5406ae777fad35102d4e125c10c58dc9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5406ae777fad35102d4e125c10c58dc9">&#9670;&#160;</a></span>Intersect() <span class="overload">[1/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a5406ae777fad35102d4e125c10c58dc9">&#9670;&#160;</a></span>Intersect() <span class="overload">[2/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -527,7 +575,7 @@ template&lt;typename ValueType &gt; </div>
 </div>
 </div>
 <a id="ad0ec3c74cbece66f6585c68166bc4478" name="ad0ec3c74cbece66f6585c68166bc4478"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad0ec3c74cbece66f6585c68166bc4478">&#9670;&#160;</a></span>Intersect() <span class="overload">[2/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0ec3c74cbece66f6585c68166bc4478">&#9670;&#160;</a></span>Intersect() <span class="overload">[3/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -577,7 +625,7 @@ template&lt;typename ValueType &gt; </div>
 </div>
 </div>
 <a id="a47186d0fb6266fbc16f2436813d312ee" name="a47186d0fb6266fbc16f2436813d312ee"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a47186d0fb6266fbc16f2436813d312ee">&#9670;&#160;</a></span>Intersect() <span class="overload">[3/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a47186d0fb6266fbc16f2436813d312ee">&#9670;&#160;</a></span>Intersect() <span class="overload">[4/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -632,8 +680,58 @@ template&lt;typename ValueType &gt; </div>
 
 </div>
 </div>
+<a id="a9dfa36d1bfceadcbc1dabef5958c3a9f" name="a9dfa36d1bfceadcbc1dabef5958c3a9f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9dfa36d1bfceadcbc1dabef5958c3a9f">&#9670;&#160;</a></span>Intersect() <span class="overload">[5/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename ValueType &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="classRecast_1_1QuadTree.html">Recast::QuadTree</a>&lt; ValueType &gt;::Intersect </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classRecast_1_1QuadTree_1_1QuadNode.html">QuadNode</a> *&#160;</td>
+          <td class="paramname"><em>node</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classRecast_1_1AABB.html">AABB</a> &amp;&#160;</td>
+          <td class="paramname"><em>aabb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; ValueType * &gt; &amp;&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>getOne</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a3a5ddff852770ee025dc589c45bb36a8" name="a3a5ddff852770ee025dc589c45bb36a8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3a5ddff852770ee025dc589c45bb36a8">&#9670;&#160;</a></span>Intersect() <span class="overload">[4/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a3a5ddff852770ee025dc589c45bb36a8">&#9670;&#160;</a></span>Intersect() <span class="overload">[6/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">

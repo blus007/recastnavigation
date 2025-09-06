@@ -10,6 +10,7 @@ var structBuildSettings =
     [ "detailSampleMaxError", "structBuildSettings.html#a677f0a3a0d3c600dccd8a4c84ade2bdc", null ],
     [ "edgeMaxError", "structBuildSettings.html#a854de08adaac1dc5c97ffd797d442b2e", null ],
     [ "edgeMaxLen", "structBuildSettings.html#ae7d2cca65464cdc0a98f7df27cd9e7a6", null ],
+    [ "maxObstacles", "structBuildSettings.html#adf480c60f949fd7e72a63b02fe20d6a1", null ],
     [ "navMeshBMax", "structBuildSettings.html#aa4bd791b8e27043a8f341274fa656edd", null ],
     [ "navMeshBMin", "structBuildSettings.html#a0edd34a0d76575e5208aa491b449f62e", null ],
     [ "partitionType", "structBuildSettings.html#a1c247eac02103152762034a47530086b", null ],

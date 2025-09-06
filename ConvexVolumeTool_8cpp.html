@@ -117,11 +117,13 @@ $(document).ready(function(){initNavTree('ConvexVolumeTool_8cpp.html',''); initR
 <code>#include &quot;<a class="el" href="DetourDebugDraw_8h_source.html">DetourDebugDraw.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="Filelist_8h_source.html">Filelist.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="QuadTree_8h_source.html">QuadTree.h</a>&quot;</code><br />
+<code>#include &quot;nlohmann/json.hpp&quot;</code><br />
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
 <tr class="memitem:a0d9d3dce7bb4b2ac0979594f65918a87" id="r_a0d9d3dce7bb4b2ac0979594f65918a87"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ConvexVolumeTool_8cpp.html#a0d9d3dce7bb4b2ac0979594f65918a87">ConvexCreation</a> { <a class="el" href="ConvexVolumeTool_8cpp.html#a0d9d3dce7bb4b2ac0979594f65918a87a857a4b97912bfc7388eeba8edcbc0db7">CONVEX_CREATION_REGION</a>
 , <a class="el" href="ConvexVolumeTool_8cpp.html#a0d9d3dce7bb4b2ac0979594f65918a87a4c96ad89c6441018a94bb327ebc44511">CONVEX_CREATION_DOOR</a>
+, <a class="el" href="ConvexVolumeTool_8cpp.html#a0d9d3dce7bb4b2ac0979594f65918a87aecba27a1aaba6df9cc544b087ed2216c">CONVEX_CREATION_BLOCK</a>
  }</td></tr>
 <tr class="separator:a0d9d3dce7bb4b2ac0979594f65918a87"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -135,8 +137,8 @@ Functions</h2></td></tr>
 <tr class="separator:a8c5d9876cd6cec34ee07abb195539ac9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aec57aa531152be79fa4a68bd4b2782f0" id="r_aec57aa531152be79fa4a68bd4b2782f0"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ConvexVolumeTool_8cpp.html#aec57aa531152be79fa4a68bd4b2782f0">pointInPoly</a> (int nvert, const float *verts, const float *p)</td></tr>
 <tr class="separator:aec57aa531152be79fa4a68bd4b2782f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2d93fe13763d78bbbbda75beb037084f" id="r_a2d93fe13763d78bbbbda75beb037084f"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ConvexVolumeTool_8cpp.html#a2d93fe13763d78bbbbda75beb037084f">sortLinks</a> (int *links, int linkSize)</td></tr>
-<tr class="separator:a2d93fe13763d78bbbbda75beb037084f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4050ab2333d3ed693b76c317a197cd7" id="r_af4050ab2333d3ed693b76c317a197cd7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ConvexVolumeTool_8cpp.html#af4050ab2333d3ed693b76c317a197cd7">sortLinks</a> (int *links, int linkSize)</td></tr>
+<tr class="separator:af4050ab2333d3ed693b76c317a197cd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -144,30 +146,6 @@ Variables</h2></td></tr>
 <tr class="separator:a3b2840434be1c301a5f60cd5b68b8672"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a990423a1946440fa1ef0843eccb5ce37" id="r_a990423a1946440fa1ef0843eccb5ce37"><td class="memItemLeft" align="right" valign="top">const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ConvexVolumeTool_8cpp.html#a990423a1946440fa1ef0843eccb5ce37">sIdMax</a> = 100</td></tr>
 <tr class="separator:a990423a1946440fa1ef0843eccb5ce37"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a195836c12e430df82bf92575cd4ba04d" id="r_a195836c12e430df82bf92575cd4ba04d"><td class="memItemLeft" align="right" valign="top">const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ConvexVolumeTool_8cpp.html#a195836c12e430df82bf92575cd4ba04d">sBufferMaxSize</a> = 1024</td></tr>
-<tr class="separator:a195836c12e430df82bf92575cd4ba04d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a20de15ee2afb956772126ea7fd52b56a" id="r_a20de15ee2afb956772126ea7fd52b56a"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ConvexVolumeTool_8cpp.html#a20de15ee2afb956772126ea7fd52b56a">sVolumeTag</a> = &quot;Volume:&quot;</td></tr>
-<tr class="separator:a20de15ee2afb956772126ea7fd52b56a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae14c8982535e13bdbd09492a7731f3d2" id="r_ae14c8982535e13bdbd09492a7731f3d2"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ConvexVolumeTool_8cpp.html#ae14c8982535e13bdbd09492a7731f3d2">sAreaTag</a> = &quot;\tarea:&quot;</td></tr>
-<tr class="separator:ae14c8982535e13bdbd09492a7731f3d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adf95ca97903d6d333b0594574c35aa75" id="r_adf95ca97903d6d333b0594574c35aa75"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ConvexVolumeTool_8cpp.html#adf95ca97903d6d333b0594574c35aa75">sHminTag</a> = &quot;\thmin:&quot;</td></tr>
-<tr class="separator:adf95ca97903d6d333b0594574c35aa75"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab30974ec1e4f825d9bb17037f0b4383f" id="r_ab30974ec1e4f825d9bb17037f0b4383f"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ConvexVolumeTool_8cpp.html#ab30974ec1e4f825d9bb17037f0b4383f">sHmaxTag</a> = &quot;\thmax:&quot;</td></tr>
-<tr class="separator:ab30974ec1e4f825d9bb17037f0b4383f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a32d4e8c15e89d1e33a19c623d2556ad1" id="r_a32d4e8c15e89d1e33a19c623d2556ad1"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ConvexVolumeTool_8cpp.html#a32d4e8c15e89d1e33a19c623d2556ad1">sNvertsTag</a> = &quot;\tnverts:&quot;</td></tr>
-<tr class="separator:a32d4e8c15e89d1e33a19c623d2556ad1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a14d39ac8d3f3d56406296f2fb85dbfdc" id="r_a14d39ac8d3f3d56406296f2fb85dbfdc"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ConvexVolumeTool_8cpp.html#a14d39ac8d3f3d56406296f2fb85dbfdc">sVertTag</a> = &quot;\t\tvert:&quot;</td></tr>
-<tr class="separator:a14d39ac8d3f3d56406296f2fb85dbfdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad83159af3eb87b46d86b961b351ecfc7" id="r_ad83159af3eb87b46d86b961b351ecfc7"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ConvexVolumeTool_8cpp.html#ad83159af3eb87b46d86b961b351ecfc7">sNlinkTag</a> = &quot;\tnlink:&quot;</td></tr>
-<tr class="separator:ad83159af3eb87b46d86b961b351ecfc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3a8fb5d2cce5c9dbe1366df44705d8dc" id="r_a3a8fb5d2cce5c9dbe1366df44705d8dc"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ConvexVolumeTool_8cpp.html#a3a8fb5d2cce5c9dbe1366df44705d8dc">sLinkTag</a> = &quot;\t\tlink:&quot;</td></tr>
-<tr class="separator:a3a8fb5d2cce5c9dbe1366df44705d8dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a933f11cd4ec8fb64cd1ce9b56950810f" id="r_a933f11cd4ec8fb64cd1ce9b56950810f"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ConvexVolumeTool_8cpp.html#a933f11cd4ec8fb64cd1ce9b56950810f">sRegionTreeTag</a> = &quot;RegionTree:&quot;</td></tr>
-<tr class="separator:a933f11cd4ec8fb64cd1ce9b56950810f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3340d4da7dd6a7489e717827dac496a2" id="r_a3340d4da7dd6a7489e717827dac496a2"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ConvexVolumeTool_8cpp.html#a3340d4da7dd6a7489e717827dac496a2">sAABBTag</a> = &quot;\tAABB:&quot;</td></tr>
-<tr class="separator:a3340d4da7dd6a7489e717827dac496a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a93d1ae4636776270a576860f414c7561" id="r_a93d1ae4636776270a576860f414c7561"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ConvexVolumeTool_8cpp.html#a93d1ae4636776270a576860f414c7561">sTreeDeepTag</a> = &quot;\tDeep:&quot;</td></tr>
-<tr class="separator:a93d1ae4636776270a576860f414c7561"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Enumeration Type Documentation</h2>
 <a id="a0d9d3dce7bb4b2ac0979594f65918a87" name="a0d9d3dce7bb4b2ac0979594f65918a87"></a>
@@ -184,6 +162,7 @@ Variables</h2></td></tr>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a0d9d3dce7bb4b2ac0979594f65918a87a857a4b97912bfc7388eeba8edcbc0db7" name="a0d9d3dce7bb4b2ac0979594f65918a87a857a4b97912bfc7388eeba8edcbc0db7"></a>CONVEX_CREATION_REGION&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="a0d9d3dce7bb4b2ac0979594f65918a87a4c96ad89c6441018a94bb327ebc44511" name="a0d9d3dce7bb4b2ac0979594f65918a87a4c96ad89c6441018a94bb327ebc44511"></a>CONVEX_CREATION_DOOR&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a0d9d3dce7bb4b2ac0979594f65918a87aecba27a1aaba6df9cc544b087ed2216c" name="a0d9d3dce7bb4b2ac0979594f65918a87aecba27a1aaba6df9cc544b087ed2216c"></a>CONVEX_CREATION_BLOCK&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
 </div>
@@ -351,17 +330,14 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a2d93fe13763d78bbbbda75beb037084f" name="a2d93fe13763d78bbbbda75beb037084f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2d93fe13763d78bbbbda75beb037084f">&#9670;&#160;</a></span>sortLinks()</h2>
+<a id="af4050ab2333d3ed693b76c317a197cd7" name="af4050ab2333d3ed693b76c317a197cd7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4050ab2333d3ed693b76c317a197cd7">&#9670;&#160;</a></span>sortLinks()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static void sortLinks </td>
+          <td class="memname">void sortLinks </td>
           <td>(</td>
           <td class="paramtype">int *&#160;</td>
           <td class="paramname"><em>links</em>, </td>
@@ -378,86 +354,11 @@ Variables</h2></td></tr>
           <td></td><td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 </div>
 </div>
 <h2 class="groupheader">Variable Documentation</h2>
-<a id="a3340d4da7dd6a7489e717827dac496a2" name="a3340d4da7dd6a7489e717827dac496a2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3340d4da7dd6a7489e717827dac496a2">&#9670;&#160;</a></span>sAABBTag</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char* sAABBTag = &quot;\tAABB:&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="ae14c8982535e13bdbd09492a7731f3d2" name="ae14c8982535e13bdbd09492a7731f3d2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae14c8982535e13bdbd09492a7731f3d2">&#9670;&#160;</a></span>sAreaTag</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char* sAreaTag = &quot;\tarea:&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a195836c12e430df82bf92575cd4ba04d" name="a195836c12e430df82bf92575cd4ba04d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a195836c12e430df82bf92575cd4ba04d">&#9670;&#160;</a></span>sBufferMaxSize</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const int sBufferMaxSize = 1024</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="ab30974ec1e4f825d9bb17037f0b4383f" name="ab30974ec1e4f825d9bb17037f0b4383f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab30974ec1e4f825d9bb17037f0b4383f">&#9670;&#160;</a></span>sHmaxTag</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char* sHmaxTag = &quot;\thmax:&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="adf95ca97903d6d333b0594574c35aa75" name="adf95ca97903d6d333b0594574c35aa75"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adf95ca97903d6d333b0594574c35aa75">&#9670;&#160;</a></span>sHminTag</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char* sHminTag = &quot;\thmin:&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="a990423a1946440fa1ef0843eccb5ce37" name="a990423a1946440fa1ef0843eccb5ce37"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a990423a1946440fa1ef0843eccb5ce37">&#9670;&#160;</a></span>sIdMax</h2>
 
@@ -480,104 +381,6 @@ Variables</h2></td></tr>
       <table class="memname">
         <tr>
           <td class="memname">const int sIdMin = 1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a3a8fb5d2cce5c9dbe1366df44705d8dc" name="a3a8fb5d2cce5c9dbe1366df44705d8dc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3a8fb5d2cce5c9dbe1366df44705d8dc">&#9670;&#160;</a></span>sLinkTag</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char* sLinkTag = &quot;\t\tlink:&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="ad83159af3eb87b46d86b961b351ecfc7" name="ad83159af3eb87b46d86b961b351ecfc7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad83159af3eb87b46d86b961b351ecfc7">&#9670;&#160;</a></span>sNlinkTag</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char* sNlinkTag = &quot;\tnlink:&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a32d4e8c15e89d1e33a19c623d2556ad1" name="a32d4e8c15e89d1e33a19c623d2556ad1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a32d4e8c15e89d1e33a19c623d2556ad1">&#9670;&#160;</a></span>sNvertsTag</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char* sNvertsTag = &quot;\tnverts:&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a933f11cd4ec8fb64cd1ce9b56950810f" name="a933f11cd4ec8fb64cd1ce9b56950810f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a933f11cd4ec8fb64cd1ce9b56950810f">&#9670;&#160;</a></span>sRegionTreeTag</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char* sRegionTreeTag = &quot;RegionTree:&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a93d1ae4636776270a576860f414c7561" name="a93d1ae4636776270a576860f414c7561"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a93d1ae4636776270a576860f414c7561">&#9670;&#160;</a></span>sTreeDeepTag</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char* sTreeDeepTag = &quot;\tDeep:&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a14d39ac8d3f3d56406296f2fb85dbfdc" name="a14d39ac8d3f3d56406296f2fb85dbfdc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a14d39ac8d3f3d56406296f2fb85dbfdc">&#9670;&#160;</a></span>sVertTag</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char* sVertTag = &quot;\t\tvert:&quot;</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a20de15ee2afb956772126ea7fd52b56a" name="a20de15ee2afb956772126ea7fd52b56a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a20de15ee2afb956772126ea7fd52b56a">&#9670;&#160;</a></span>sVolumeTag</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char* sVolumeTag = &quot;Volume:&quot;</td>
         </tr>
       </table>
 </div><div class="memdoc">
