@@ -626,6 +626,10 @@ void Sample::saveDoor()
 			sortLinks((int*)volume->links, volume->linkCount);
 			item["link"] = { volume->links[0], volume->links[1] };
 		}
+		else
+		{
+			item["link"] = { 200, 201 };
+		}
 		data["volumes"].push_back(item);
 	}
 	std::string str = data.dump(2, ' ');
