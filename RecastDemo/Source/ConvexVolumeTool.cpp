@@ -33,6 +33,7 @@
 #include "DetourDebugDraw.h"
 #include "Filelist.h"
 #include "QuadTree.h"
+#include "nlohmann/json.hpp"
 
 #ifdef WIN32
 #	define snprintf _snprintf
@@ -44,22 +45,11 @@ enum ConvexCreation
 {
     CONVEX_CREATION_REGION,
     CONVEX_CREATION_DOOR,
+	CONVEX_CREATION_BLOCK,
 };
 
 const int sIdMin = 1;
 const int sIdMax = 100;
-const int sBufferMaxSize = 1024;
-const char* sVolumeTag = "Volume:";
-const char* sAreaTag = "\tarea:";
-const char* sHminTag = "\thmin:";
-const char* sHmaxTag = "\thmax:";
-const char* sNvertsTag = "\tnverts:";
-const char* sVertTag = "\t\tvert:";
-const char* sNlinkTag = "\tnlink:";
-const char* sLinkTag = "\t\tlink:";
-const char* sRegionTreeTag = "RegionTree:";
-const char* sAABBTag = "\tAABB:";
-const char* sTreeDeepTag = "\tDeep:";
 
 // Returns true if 'c' is left of line 'a'-'b'.
 inline bool left(const float* a, const float* b, const float* c)
@@ -135,7 +125,7 @@ static int pointInPoly(int nvert, const float* verts, const float* p)
     return 1;
 }
 
-static void sortLinks(int* links, int linkSize)
+void sortLinks(int* links, int linkSize)
 {
     if (linkSize < 2)
         return;
@@ -204,6 +194,14 @@ void ConvexVolumeTool::handleMenu()
         m_nhull = 0;
         m_error.clear();
     }
+	if (imguiCheck("Block", m_creationType == CONVEX_CREATION_BLOCK))
+	{
+		m_creationType = CONVEX_CREATION_BLOCK;
+		m_areaType = SAMPLE_POLYAREA_BLOCK;
+		m_npts = 0;
+		m_nhull = 0;
+		m_error.clear();
+	}
     
     imguiSeparator();
     
@@ -414,58 +412,7 @@ void ConvexVolumeTool::handleClick(const float* /*s*/, const float* p, bool shif
 		// Create
         int ret = ADD_CONVEX_SUCCESS;
         int id = (int)(m_id + 0.3f);
-        if (m_creationType == CONVEX_CREATION_REGION)
-        {
-            // If clicked on that last pt, create the shape.
-            if (m_npts && rcVdistSqr(p, &m_pts[(m_npts-1)*3]) < rcSqr(0.2f))
-            {
-                if (m_nhull > 2)
-                {
-                    // Create shape.
-                    float verts[MAX_PTS*3];
-                    for (int i = 0; i < m_nhull; ++i)
-                        rcVcopy(&verts[i*3], &m_pts[m_hull[i]*3]);
-                    
-                    float minh = FLT_MAX, maxh = 0;
-                    for (int i = 0; i < m_nhull; ++i)
-                        minh = rcMin(minh, verts[i*3+1]);
-                    minh -= m_boxDescent;
-                    maxh = minh + m_boxHeight;
-                    
-                    if (m_polyOffset > 0.01f)
-                    {
-                        float offset[MAX_PTS*2*3];
-                        int noffset = rcOffsetPoly(verts, m_nhull, m_polyOffset, offset, MAX_PTS*2);
-                        if (noffset > 0)
-                            ret = addConvexVolume(id, offset, noffset, minh, maxh, (unsigned char)m_areaType);
-                    }
-                    else
-                    {
-                        ret = addConvexVolume(id, verts, m_nhull, minh, maxh, (unsigned char)m_areaType);
-                    }
-                    if (ret == ADD_CONVEX_SUCCESS)
-                    {
-                        m_npts = 0;
-                        m_nhull = 0;
-                    }
-                }
-            }
-            else
-            {
-                // Add new point
-                if (m_npts < MAX_PTS)
-                {
-                    rcVcopy(&m_pts[m_npts*3], p);
-                    m_npts++;
-                    // Update hull.
-                    if (m_npts > 1)
-                        m_nhull = convexhull(m_pts, m_npts, m_hull);
-                    else
-                        m_nhull = 0;
-                }
-            }
-        }
-        else if (m_creationType == CONVEX_CREATION_DOOR)
+        if (m_creationType == CONVEX_CREATION_DOOR)
         {
             /*
              2    1
@@ -508,6 +455,57 @@ void ConvexVolumeTool::handleClick(const float* /*s*/, const float* p, bool shif
             
             ret = addConvexVolume(id, m_pts, 4, minh, maxh, (unsigned char)m_areaType);
         }
+		else
+		{
+			// If clicked on that last pt, create the shape.
+			if (m_npts && rcVdistSqr(p, &m_pts[(m_npts - 1) * 3]) < rcSqr(0.2f))
+			{
+				if (m_nhull > 2)
+				{
+					// Create shape.
+					float verts[MAX_PTS * 3];
+					for (int i = 0; i < m_nhull; ++i)
+						rcVcopy(&verts[i * 3], &m_pts[m_hull[i] * 3]);
+
+					float minh = FLT_MAX, maxh = 0;
+					for (int i = 0; i < m_nhull; ++i)
+						minh = rcMin(minh, verts[i * 3 + 1]);
+					minh -= m_boxDescent;
+					maxh = minh + m_boxHeight;
+
+					if (m_polyOffset > 0.01f)
+					{
+						float offset[MAX_PTS * 2 * 3];
+						int noffset = rcOffsetPoly(verts, m_nhull, m_polyOffset, offset, MAX_PTS * 2);
+						if (noffset > 0)
+							ret = addConvexVolume(id, offset, noffset, minh, maxh, (unsigned char)m_areaType);
+					}
+					else
+					{
+						ret = addConvexVolume(id, verts, m_nhull, minh, maxh, (unsigned char)m_areaType);
+					}
+					if (ret == ADD_CONVEX_SUCCESS)
+					{
+						m_npts = 0;
+						m_nhull = 0;
+					}
+				}
+			}
+			else
+			{
+				// Add new point
+				if (m_npts < MAX_PTS)
+				{
+					rcVcopy(&m_pts[m_npts * 3], p);
+					m_npts++;
+					// Update hull.
+					if (m_npts > 1)
+						m_nhull = convexhull(m_pts, m_npts, m_hull);
+					else
+						m_nhull = 0;
+				}
+			}
+		}
         if (ret == ADD_CONVEX_SUCCESS)
         {
             m_error = "";
@@ -619,268 +617,6 @@ void ConvexVolumeTool::handleRenderOverlay(double* proj, double* model, int* vie
 		imguiDrawText(280, h-40, IMGUI_ALIGN_LEFT, "Click LMB to add new points. Click on the red point to finish the shape. SHIFT+LMB on the red point: delete point.", imguiRGBA(255,255,255,192));
 		imguiDrawText(280, h-60, IMGUI_ALIGN_LEFT, "The shape will be convex hull of all added points.", imguiRGBA(255,255,255,192));	
 	}	
-}
-
-void ConvexVolumeTool::saveVolumes(SamplePolyAreas area)
-{
-    InputGeom* geom = m_sample->getInputGeom();
-    if (!geom)
-        return;
-    auto mesh = geom->getMesh();
-    if (!mesh)
-        return;
-    const int maxSize = 1024;
-    char buffer[maxSize];
-    std::string volumeName = getFileName(mesh->getFileName());
-    const char* fileExt = nullptr;
-    switch (area)
-    {
-        case SAMPLE_POLYAREA_DOOR:
-            fileExt = "door";
-            break;
-            
-        case SAMPLE_POLYAREA_REGION:
-            fileExt = "region";
-            break;
-        
-        default: return;
-    }
-    snprintf(buffer, maxSize, "Output/%s.%s", volumeName.c_str(), fileExt);
-    FILE* file = fopen(buffer, "w");
-    const ConvexVolume* volumes = geom->getConvexVolumes();
-    int volumeCount = geom->getConvexVolumeCount();
-    std::vector<int> indices;
-    for (int i = 0; i < volumeCount; ++i)
-    {
-        if (volumes[i].area != area)
-            continue;
-        indices.push_back(i);
-    }
-    if (indices.empty())
-    {
-        fclose(file);
-        return;
-    }
-    if (indices.size() > 1)
-    {
-        std::sort(indices.begin(), indices.end(), [&](int a, int b) {
-            const ConvexVolume* va = volumes + a;
-            const ConvexVolume* vb = volumes + b;
-            return va->id < vb->id;
-        });
-    }
-    std::vector<Recast::QuadTree<ConvexVolume>::Element*> elems;
-    Recast::QuadTree<ConvexVolume> tree;
-    if (area == SAMPLE_POLYAREA_REGION)
-    {
-        float minX = INFINITY;
-        float maxX = -INFINITY;
-        float minZ = INFINITY;
-        float maxZ = -INFINITY;
-        for (int i = 0; i < indices.size(); ++i)
-        {
-            ConvexVolume* v = (ConvexVolume*)volumes + indices[i];
-            v->CalcAABB();
-            for (int j = 0; j < v->nverts; ++j)
-            {
-                float x = v->verts[j * 3];
-                minX = minX < x ? minX : x;
-                maxX = maxX > x ? maxX : x;
-                float z = v->verts[j * 3 + 2];
-                minZ = minZ < z ? minZ : z;
-                maxZ = maxZ > z ? maxZ : z;
-            }
-        }
-        elems.resize(indices.size());
-        float width = maxX - minX;
-        float height = maxZ - minZ;
-        tree.Init(minX - 1, minZ - 1, width + 1, height + 1);
-        for (int i = 0; i < indices.size(); ++i)
-        {
-            ConvexVolume* v = (ConvexVolume*)volumes + indices[i];
-            elems[i] = tree.Add(v);
-        }
-        int size = snprintf(buffer, maxSize, "%sx=%0.6f,y=%0.6f,width=%0.6f,height=%0.6f\n", sRegionTreeTag, minX, minZ, width, height);
-        fwrite(buffer, 1, size, file);
-    }
-    for (int i = 0; i < indices.size(); ++i)
-    {
-        int size = 0;
-        const int index = indices[i];
-        const ConvexVolume* volume = &volumes[index];
-        
-        size = snprintf(buffer, maxSize, "%s%d\n", sVolumeTag, volume->id);
-        fwrite(buffer, 1, size, file);
-        
-        size = snprintf(buffer, maxSize, "%s%d\n", sAreaTag, volume->area);
-        fwrite(buffer, 1, size, file);
-        
-        if (area == SAMPLE_POLYAREA_REGION)
-        {
-            const Recast::AABB* aabb = volume->GetAABB();
-            size = snprintf(buffer, maxSize, "%sx=%0.6f,y=%0.6f,width=%0.6f,height=%0.6f\n", sAABBTag, aabb->GetLeft(), aabb->GetBottom(), aabb->GetWidth(), aabb->GetHeight());
-            fwrite(buffer, 1, size, file);
-            
-            auto* elem = elems[i];
-            auto* node = (Recast::QuadTree<ConvexVolume>::QuadNode*)elem->GetNode();
-            size = snprintf(buffer, maxSize, "%s%d\n", sTreeDeepTag, node->GetDeep());
-            fwrite(buffer, 1, size, file);
-        }
-        
-        size = snprintf(buffer, maxSize, "%s%0.6f\n", sHminTag, volume->hmin);
-        fwrite(buffer, 1, size, file);
-        
-        size = snprintf(buffer, maxSize, "%s%0.6f\n", sHmaxTag, volume->hmax);
-        fwrite(buffer, 1, size, file);
-        
-        size = snprintf(buffer, maxSize, "%s%d\n", sNvertsTag, volume->nverts);
-        fwrite(buffer, 1, size, file);
-        
-        for (int j = 0; j < volume->nverts; ++j)
-        {
-            const float* verts = &volume->verts[j * 3];
-            size = snprintf(buffer, maxSize, "%sx=%0.6f,y=%0.6f,z=%0.6f\n", sVertTag, verts[0], verts[1], verts[2]);
-            fwrite(buffer, 1, size, file);
-        }
-        
-        if (volume->linkCount > 0)
-        {
-            size = snprintf(buffer, maxSize, "%s%d\n", sNlinkTag, volume->linkCount);
-            fwrite(buffer, 1, size, file);
-            
-            sortLinks((int*)volume->links, volume->linkCount);
-            for (int j = 0; j < volume->linkCount; ++j)
-            {
-                size = snprintf(buffer, maxSize, "%s%d\n", sLinkTag, volume->links[j]);
-                fwrite(buffer, 1, size, file);
-            }
-        }
-    }
-    fclose(file);
-}
-
-void ConvexVolumeTool::loadVolumes(SamplePolyAreas area)
-{
-    InputGeom* geom = m_sample->getInputGeom();
-    if (!geom)
-        return;
-    auto mesh = geom->getMesh();
-    if (!mesh)
-        return;
-    const int maxSize = sBufferMaxSize;
-    char buffer1[maxSize];
-    char buffer2[maxSize];
-    const char* fileExt = nullptr;
-    switch (area)
-    {
-        case SAMPLE_POLYAREA_DOOR:
-            fileExt = "door";
-            break;
-            
-        case SAMPLE_POLYAREA_REGION:
-            fileExt = "region";
-            break;
-            
-        default: return;
-    }
-    std::string volumeName = getFileName(mesh->getFileName());
-    snprintf(buffer1, maxSize, "Output/%s.%s", volumeName.c_str(), fileExt);
-    FILE* file = fopen(buffer1, "r");
-    if (!file)
-        return;
-
-	auto readFunc = [&](char* buffer, int size) {
-		return fread(buffer, 1, size, file);
-	};
-
-    geom->deleteConvexVolumes(area);
-    char* buffer = buffer1;
-    int bufferPos = 0;
-    int readCount = 0;
-    bool readEnd = false;
-    ConvexVolume volume;
-    volume.id = 0;
-    int vertIndex = 0;
-    int linkIndex = 0;
-    const int volumeTagSize = strlen(sVolumeTag);
-    const int areaTagSize = strlen(sAreaTag);
-    const int hminTagSize = strlen(sHminTag);
-    const int hmaxTagSize = strlen(sHmaxTag);
-    const int nvertsTagSize = strlen(sNvertsTag);
-    const int vertTagSize = strlen(sVertTag);
-    const int nlinkTagSize = strlen(sNlinkTag);
-    const int linkTagSize = strlen(sLinkTag);
-    const int scanFormatSize = 256;
-    char scanFormat[scanFormatSize];
-    do
-    {
-        char* str = buffer == buffer1 ? buffer2 : buffer1;
-        bool success = readLine(readFunc, buffer, maxSize, bufferPos, readCount, str, readEnd);
-        if (!success && readEnd)
-            break;
-        if (strncmp(str, sVolumeTag, volumeTagSize) == 0)
-        {
-            if (volume.id)
-            {
-                geom->addConvexVolume(volume.id, volume.verts, volume.nverts, volume.hmin, volume.hmax, (unsigned char)volume.area, volume.linkCount, volume.links);
-            }
-            snprintf(scanFormat, scanFormatSize, "%s%%d", sVolumeTag);
-            sscanf(str, scanFormat, &volume.id);
-            volume.linkCount = 0;
-            vertIndex = 0;
-            linkIndex = 0;
-            continue;
-        }
-        if (strncmp(str, sAreaTag, areaTagSize) == 0)
-        {
-            snprintf(scanFormat, scanFormatSize, "%s%%d", sAreaTag);
-            sscanf(str, scanFormat, &volume.area);
-            continue;
-        }
-        if (strncmp(str, sHminTag, hminTagSize) == 0)
-        {
-            snprintf(scanFormat, scanFormatSize, "%s%%f", sHminTag);
-            sscanf(str, scanFormat, &volume.hmin);
-            continue;
-        }
-        if (strncmp(str, sHmaxTag, hmaxTagSize) == 0)
-        {
-            snprintf(scanFormat, scanFormatSize, "%s%%f", sHmaxTag);
-            sscanf(str, scanFormat, &volume.hmax);
-            continue;
-        }
-        if (strncmp(str, sNvertsTag, nvertsTagSize) == 0)
-        {
-            snprintf(scanFormat, scanFormatSize, "%s%%d", sNvertsTag);
-            sscanf(str, scanFormat, &volume.nverts);
-            continue;
-        }
-        if (strncmp(str, sVertTag, vertTagSize) == 0)
-        {
-            snprintf(scanFormat, scanFormatSize, "%sx=%%f,y=%%f,z=%%f", sVertTag);
-            float* vert = &volume.verts[vertIndex++ * 3];
-            sscanf(str, scanFormat, &vert[0], &vert[1], &vert[2]);
-            continue;
-        }
-        if (strncmp(str, sNlinkTag, nlinkTagSize) == 0)
-        {
-            snprintf(scanFormat, scanFormatSize, "%s%%d", sNlinkTag);
-            sscanf(str, scanFormat, &volume.linkCount);
-            continue;
-        }
-        if (strncmp(str, sLinkTag, linkTagSize) == 0)
-        {
-            snprintf(scanFormat, scanFormatSize, "%s%%d", sLinkTag);
-            sscanf(str, scanFormat, volume.links + linkIndex);
-            ++linkIndex;
-            continue;
-        }
-    } while (true);
-    if (volume.id)
-    {
-        geom->addConvexVolume(volume.id, volume.verts, volume.nverts, volume.hmin, volume.hmax, (unsigned char)volume.area, volume.linkCount, volume.links);
-    }
-    fclose(file);
 }
 
 const ConvexVolume* ConvexVolumeTool::findRegion(int id)

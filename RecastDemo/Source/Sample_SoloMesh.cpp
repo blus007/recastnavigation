@@ -270,7 +270,7 @@ void Sample_SoloMesh::handleRender()
 			duDebugDrawNavMeshBVTree(&m_dd, *m_navMesh);
 		if (m_drawMode == DRAWMODE_NAVMESH_NODES)
 			duDebugDrawNavMeshNodes(&m_dd, *m_navQuery);
-		duDebugDrawNavMeshPolysWithFlags(&m_dd, *m_navMesh, SAMPLE_POLYFLAGS_DISABLED, duRGBA(0,0,0,128));
+		duDebugDrawNavMeshPolysWithFlags(&m_dd, *m_navMesh, SAMPLE_POLYFLAGS_DISABLED, duRGBA(255,0,0,255));
 	}
 		
 	glDepthMask(GL_TRUE);
@@ -516,7 +516,7 @@ bool Sample_SoloMesh::handleBuild()
 	const ConvexVolume* vols = m_geom->getConvexVolumes();
 	for (int i  = 0; i < m_geom->getConvexVolumeCount(); ++i)
     {
-        if (vols[i].area == SAMPLE_POLYAREA_DOOR)
+        if (vols[i].area == SAMPLE_POLYAREA_DOOR || vols[i].area == SAMPLE_POLYAREA_BLOCK)
         {
             rcMarkConvexPolyArea(m_ctx, vols[i].verts, vols[i].nverts, vols[i].hmin, vols[i].hmax, (unsigned char)vols[i].area, *m_chf);
         }
@@ -676,6 +676,10 @@ bool Sample_SoloMesh::handleBuild()
 			else if (m_pmesh->areas[i] == SAMPLE_POLYAREA_DOOR)
 			{
 				m_pmesh->flags[i] = SAMPLE_POLYFLAGS_WALK | SAMPLE_POLYFLAGS_DOOR;
+			}
+			else if (m_pmesh->areas[i] == SAMPLE_POLYAREA_BLOCK)
+			{
+				m_pmesh->flags[i] = SAMPLE_POLYFLAGS_DISABLED;
 			}
 		}
 

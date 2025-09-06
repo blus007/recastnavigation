@@ -1,4 +1,4 @@
-file(GLOB HEADERS Include/*.h Contrib/fastlz/fastlz.h ../QuadTree/Include/*.h)
+file(GLOB HEADERS Include/*.h Contrib/fastlz/fastlz.h ../QuadTree/Include/*.h ../ThirdParty/json/include/nlohmann/*.hpp)
 file(GLOB SOURCES Source/*.cpp Contrib/fastlz/fastlz.c)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
@@ -30,6 +30,7 @@ include_directories(../DetourCrowd/Include)
 include_directories(../DetourTileCache/Include)
 include_directories(../Recast/Include)
 include_directories(../QuadTree/Include)
+include_directories(../ThirdParty/json/include)
 include_directories(Include)
 include_directories(Contrib/SDL/include)
 if(APPLE)

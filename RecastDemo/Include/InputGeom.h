@@ -43,10 +43,10 @@ struct ConvexVolume
     
     void CalcAABB()
     {
-        float minX = INFINITY;
-        float maxX = -INFINITY;
-        float minZ = INFINITY;
-        float maxZ = -INFINITY;
+        float minX = HUGE_VALF;
+        float maxX = -HUGE_VALF;
+        float minZ = HUGE_VALF;
+        float maxZ = -HUGE_VALF;
         for (int j = 0; j < nverts; ++j)
         {
             float x = verts[j * 3];
@@ -114,6 +114,8 @@ struct BuildSettings
 	float navMeshBMax[3];
 	// Size of the tiles in voxels
 	float tileSize;
+	// max obstacles can be placed in map
+	int maxObstacles;
 };
 
 class InputGeom

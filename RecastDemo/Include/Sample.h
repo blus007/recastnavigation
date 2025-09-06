@@ -49,6 +49,7 @@ enum SamplePolyAreas
 	SAMPLE_POLYAREA_GRASS,
 	SAMPLE_POLYAREA_JUMP,
     SAMPLE_POLYAREA_REGION,
+	SAMPLE_POLYAREA_BLOCK,
 };
 enum SamplePolyFlags
 {
@@ -162,6 +163,7 @@ public:
 	virtual bool handleBuild();
 	virtual void handleUpdate(const float dt);
 	virtual void collectSettings(struct BuildSettings& settings);
+	virtual void loadSettings(const struct BuildSettings& settings);
 
 	virtual class InputGeom* getInputGeom() { return m_geom; }
 	virtual class dtNavMesh* getNavMesh() { return m_navMesh; }
@@ -182,6 +184,12 @@ public:
 
 	void resetCommonSettings();
 	void handleCommonSettings();
+
+	void saveDoor();
+	void loadDoor();
+	void saveRegion();
+	void loadRegion();
+	void loadBlock();
 
 private:
 	// Explicitly disabled copy constructor and copy assignment operator.

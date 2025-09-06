@@ -67,6 +67,8 @@ static SampleItem g_samples[] =
 	{ createTempObstacle, "Temp Obstacles" },
 };
 static const int g_nsamples = sizeof(g_samples) / sizeof(SampleItem);
+bool g_showBlock = true;
+bool g_showBlockName = false;
 
 int main(int /*argc*/, char** /*argv*/)
 {
@@ -193,6 +195,7 @@ int main(int /*argc*/, char** /*argv*/)
 	glEnable(GL_CULL_FACE);
 	glDepthFunc(GL_LEQUAL);
 	
+	float speedScale = 4.0f;
 	bool done = false;
 	while(!done)
 	{
@@ -476,11 +479,11 @@ int main(int /*argc*/, char** /*argv*/)
 		moveUp		= rcClamp(moveUp	+ dt * 4 * ((keystate[SDL_SCANCODE_Q] || keystate[SDL_SCANCODE_PAGEUP	]) ? 1 : -1), 0.0f, 1.0f);
 		moveDown	= rcClamp(moveDown	+ dt * 4 * ((keystate[SDL_SCANCODE_E] || keystate[SDL_SCANCODE_PAGEDOWN	]) ? 1 : -1), 0.0f, 1.0f);
 		
-		float keybSpeed = 22.0f;
-		if (SDL_GetModState() & KMOD_SHIFT)
+		float keybSpeed = 22.0f * speedScale;
+		/*if (SDL_GetModState() & KMOD_SHIFT)
 		{
 			keybSpeed *= 4.0f;
-		}
+		}*/
 		
 		float movex = (moveRight - moveLeft) * keybSpeed * dt;
 		float movey = (moveBack - moveFront) * keybSpeed * dt + scrollZoom * 2.0f;
@@ -543,6 +546,12 @@ int main(int /*argc*/, char** /*argv*/)
 				showLog = !showLog;
 			if (imguiCheck("Show Tools", showTools))
 				showTools = !showTools;
+			if (imguiCheck("Show Block", g_showBlock))
+				g_showBlock = !g_showBlock;
+			if (imguiCheck("Show Block Name", g_showBlockName))
+				g_showBlockName = !g_showBlockName;
+			imguiSlider("Speed Scale", &speedScale, 1.0f, 100.0f, 1.0f);
+			
 
 			imguiSeparator();
 			imguiLabel("Sample");

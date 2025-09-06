@@ -68,25 +68,30 @@ private:
     int addConvexVolume(const int id, const float* verts, const int nverts,
                         const float minh, const float maxh, unsigned char area);
     
-    void saveVolumes(SamplePolyAreas area);
-    void loadVolumes(SamplePolyAreas area);
-    
     inline void saveDoors()
     {
-        saveVolumes(SAMPLE_POLYAREA_DOOR);
+		if (!m_sample)
+			return;
+		m_sample->saveDoor();
     }
     inline void loadDoors()
     {
-        loadVolumes(SAMPLE_POLYAREA_DOOR);
+		if (!m_sample)
+			return;
+		m_sample->loadDoor();
     }
     
     inline void saveRegions()
     {
-        saveVolumes(SAMPLE_POLYAREA_REGION);
+		if (!m_sample)
+			return;
+		m_sample->saveRegion();
     }
     inline void loadRegions()
     {
-        loadVolumes(SAMPLE_POLYAREA_REGION);
+		if (!m_sample)
+			return;
+		m_sample->loadRegion();
     }
     
     const struct ConvexVolume* findRegion(int id);

@@ -501,6 +501,44 @@ namespace Recast
             }
             return hasValue;
         }
+
+        bool Intersect(const AABB& circle, std::vector<ValueType*>& output, bool getOne = false)
+        {
+            if (!mRoot)
+                return false;
+            return Intersect(mRoot, aabb, output, getOne);
+        }
+
+        bool Intersect(QuadNode* node, const AABB& aabb, std::vector<ValueType*>& output, bool getOne = false)
+        {
+            if (!node->GetRouteElemCount())
+                return false;
+            if (!node->Intersect(aabb))
+                return false;
+            int elemCount = node->GetElemCount();
+            bool hasValue = false;
+            for (int i = 0; i < elemCount; ++i)
+            {
+                Element* elem = node->GetElem(i);
+                ValueType* value = elem->GetValue();
+                if (!value->Intersect(aabb))
+                    continue;
+                output.push_back(value);
+                if (getOne)
+                    return true;
+                hasValue = true;
+            }
+            if (!node->HasChild())
+                return hasValue;
+            for (int i = 0; i < QT_NODE_COUNT; ++i)
+            {
+                QuadNode* child = node->GetChild(i);
+                hasValue = Intersect(child, aabb, output, getOne) || hasValue;
+                if (getOne && hasValue)
+                    return true;
+            }
+            return hasValue;
+        }
         
     private:
         int mMaxDeep;

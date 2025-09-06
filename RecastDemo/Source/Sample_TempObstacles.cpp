@@ -48,11 +48,14 @@
 #include "RecastAssert.h"
 #include "fastlz.h"
 #include "Filelist.h"
+#include "nlohmann/json.hpp"
+#include <fstream>
 
 #ifdef WIN32
 #	define snprintf _snprintf
 #endif
 
+#define MAX_NODE 65535
 
 // This value specifies how many layers (or "floors") each navmesh tile is expected to have.
 static const int EXPECTED_LAYERS_PER_TILE = 4;
@@ -223,6 +226,10 @@ struct MeshProcess : public dtTileCacheMeshProcess
 			else if (polyAreas[i] == SAMPLE_POLYAREA_DOOR)
 			{
 				polyFlags[i] = SAMPLE_POLYFLAGS_WALK | SAMPLE_POLYFLAGS_DOOR;
+			}
+			else if (polyAreas[i] == SAMPLE_POLYAREA_BLOCK)
+			{
+				polyFlags[i] = SAMPLE_POLYFLAGS_DISABLED;
 			}
 		}
 
@@ -405,7 +412,7 @@ int Sample_TempObstacles::rasterizeTileLayers(
 	const ConvexVolume* vols = m_geom->getConvexVolumes();
 	for (int i  = 0; i < m_geom->getConvexVolumeCount(); ++i)
 	{
-        if (vols[i].area == SAMPLE_POLYAREA_DOOR)
+        if (vols[i].area == SAMPLE_POLYAREA_DOOR || vols[i].area == SAMPLE_POLYAREA_BLOCK)
         {
             rcMarkConvexPolyArea(m_ctx, vols[i].verts, vols[i].nverts,
                                  vols[i].hmin, vols[i].hmax,
@@ -854,7 +861,8 @@ Sample_TempObstacles::Sample_TempObstacles() :
 	m_drawMode(DRAWMODE_NAVMESH),
 	m_maxTiles(0),
 	m_maxPolysPerTile(0),
-	m_tileSize(48)
+	m_tileSize(48),
+	m_maxObstacles(20000)
 {
 	resetCommonSettings();
 	
@@ -953,7 +961,14 @@ void Sample_TempObstacles::handleSettings()
 		dtFreeNavMesh(m_navMesh);
 		dtFreeTileCache(m_tileCache);
 		loadAll();
-		m_navQuery->init(m_navMesh, 2048);
+		m_navQuery->init(m_navMesh, MAX_NODE);
+	}
+
+	if (imguiButton("Load Configs"))
+	{
+		loadConfigs();
+		loadDoor();
+		loadBlock();
 	}
 
 	imguiUnindent();
@@ -1108,7 +1123,7 @@ void Sample_TempObstacles::handleRender()
 			duDebugDrawNavMeshPortals(&m_dd, *m_navMesh);
 		if (m_drawMode == DRAWMODE_NAVMESH_NODES)
 			duDebugDrawNavMeshNodes(&m_dd, *m_navQuery);
-		duDebugDrawNavMeshPolysWithFlags(&m_dd, *m_navMesh, SAMPLE_POLYFLAGS_DISABLED, duRGBA(0,0,0,128));
+		duDebugDrawNavMeshPolysWithFlags(&m_dd, *m_navMesh, SAMPLE_POLYFLAGS_DISABLED, duRGBA(255,0,0,255));
 	}
 	
 	
@@ -1272,7 +1287,7 @@ bool Sample_TempObstacles::handleBuild()
 	tcparams.walkableClimb = m_agentMaxClimb;
 	tcparams.maxSimplificationError = m_edgeMaxError;
 	tcparams.maxTiles = tw*th*EXPECTED_LAYERS_PER_TILE;
-	tcparams.maxObstacles = 20000;
+	tcparams.maxObstacles = m_maxObstacles;
 
 	dtFreeTileCache(m_tileCache);
 	
@@ -1313,7 +1328,7 @@ bool Sample_TempObstacles::handleBuild()
 		return false;
 	}
 	
-	status = m_navQuery->init(m_navMesh, 2048);
+	status = m_navQuery->init(m_navMesh, MAX_NODE);
 	if (dtStatusFailed(status))
 	{
 		m_ctx->log(RC_LOG_ERROR, "buildTiledNavigation: Could not init Detour navmesh query");
@@ -1576,4 +1591,53 @@ void Sample_TempObstacles::loadAll()
 	}
 	
 	fclose(fp);
+}
+
+void Sample_TempObstacles::loadSettings(const struct BuildSettings& settings)
+{
+	Sample::loadSettings(settings);
+
+	m_tileSize = settings.tileSize;
+	m_maxObstacles = settings.maxObstacles;
+}
+
+void Sample_TempObstacles::loadConfigs()
+{
+	InputGeom* geom = getInputGeom();
+	if (!geom)
+		return;
+	auto mesh = geom->getMesh();
+	if (!mesh)
+		return;
+
+	BuildSettings buildSettings;
+	{
+		const int maxSize = 1024;
+		char cfgPath[maxSize];
+		std::string meshName = getFileName(mesh->getFileName());
+		snprintf(cfgPath, maxSize, "Config/%s.json", meshName.c_str());
+
+		std::ifstream read(cfgPath);
+		if (!read.is_open())
+			return;
+		nlohmann::json data = nlohmann::json::parse(read);
+		buildSettings.cellSize = data["cellSize"];
+		buildSettings.cellHeight = data["cellHeight"];
+		buildSettings.agentHeight = data["agentHeight"];
+		buildSettings.agentRadius = data["agentRadius"];
+		buildSettings.agentMaxClimb = data["agentMaxClimb"];
+		buildSettings.agentMaxSlope = data["agentMaxSlope"];
+		buildSettings.regionMinSize = data["regionMinSize"];
+		buildSettings.regionMergeSize = data["regionMergeSize"];
+		buildSettings.edgeMaxLen = data["edgeMaxLen"];
+		buildSettings.edgeMaxError = data["edgeMaxError"];
+		buildSettings.vertsPerPoly = data["vertsPerPoly"];
+		buildSettings.detailSampleDist = data["detailSampleDist"];
+		buildSettings.detailSampleMaxError = data["detailSampleMaxError"];
+		buildSettings.partitionType = data["partitionType"];
+		buildSettings.tileSize = data["tileSize"];
+		buildSettings.maxObstacles = data.value("maxObstacles", 20000);
+	}
+	loadSettings(buildSettings);
+	handleSettings();
 }

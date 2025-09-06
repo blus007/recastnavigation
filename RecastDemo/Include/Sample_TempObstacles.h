@@ -60,6 +60,7 @@ protected:
 	int m_maxTiles;
 	int m_maxPolysPerTile;
 	float m_tileSize;
+	int m_maxObstacles;
 	
 public:
 	Sample_TempObstacles();
@@ -85,6 +86,9 @@ public:
 
 	void saveAll();
 	void loadAll();
+
+	virtual void loadSettings(const struct BuildSettings& settings);
+	void loadConfigs();
 
 private:
 	// Explicitly disabled copy constructor and copy assignment operator.

@@ -571,6 +571,7 @@ void InputGeom::deleteConvexVolumes(unsigned char area)
     }
 }
 
+extern bool g_showBlock;
 void InputGeom::drawConvexVolumes(struct duDebugDraw* dd, bool /*hilight*/)
 {
 	dd->depthMask(false);
@@ -580,6 +581,8 @@ void InputGeom::drawConvexVolumes(struct duDebugDraw* dd, bool /*hilight*/)
 	for (int i = 0; i < m_volumeCount; ++i)
 	{
 		const ConvexVolume* vol = &m_volumes[i];
+		if (vol->area == SAMPLE_POLYAREA_BLOCK && !g_showBlock)
+			continue;
 		unsigned int col = duTransCol(dd->areaToCol(vol->area), 32);
 		for (int j = 0, k = vol->nverts-1; j < vol->nverts; k = j++)
 		{
@@ -606,6 +609,8 @@ void InputGeom::drawConvexVolumes(struct duDebugDraw* dd, bool /*hilight*/)
 	for (int i = 0; i < m_volumeCount; ++i)
 	{
 		const ConvexVolume* vol = &m_volumes[i];
+		if (vol->area == SAMPLE_POLYAREA_BLOCK && !g_showBlock)
+			continue;
 		unsigned int col = duTransCol(dd->areaToCol(vol->area), 220);
 		for (int j = 0, k = vol->nverts-1; j < vol->nverts; k = j++)
 		{
@@ -625,6 +630,8 @@ void InputGeom::drawConvexVolumes(struct duDebugDraw* dd, bool /*hilight*/)
 	for (int i = 0; i < m_volumeCount; ++i)
 	{
 		const ConvexVolume* vol = &m_volumes[i];
+		if (vol->area == SAMPLE_POLYAREA_BLOCK && !g_showBlock)
+			continue;
 		unsigned int col = duDarkenCol(duTransCol(dd->areaToCol(vol->area), 220));
 		for (int j = 0; j < vol->nverts; ++j)
 		{
