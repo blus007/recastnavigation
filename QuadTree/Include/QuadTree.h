@@ -502,7 +502,7 @@ namespace Recast
             return hasValue;
         }
 
-        bool Intersect(const AABB& circle, std::vector<ValueType*>& output, bool getOne = false)
+        bool Intersect(const AABB& aabb, std::vector<ValueType*>& output, bool getOne = false)
         {
             if (!mRoot)
                 return false;
