@@ -11,7 +11,7 @@ var classRecast_1_1QuadTree =
     [ "Clear", "classRecast_1_1QuadTree.html#a91b159df2f93930f8bea32634b8f4927", null ],
     [ "GetRoot", "classRecast_1_1QuadTree.html#aa9037eddd131a34004f2a8a1580fa274", null ],
     [ "Init", "classRecast_1_1QuadTree.html#aaa5a1a832cddcf160c72249033bf94a5", null ],
-    [ "Intersect", "classRecast_1_1QuadTree.html#a16e58a00fb54d22a9064b6b78b58a375", null ],
+    [ "Intersect", "classRecast_1_1QuadTree.html#ac5f790d24167a97e34f3116fd38c4185", null ],
     [ "Intersect", "classRecast_1_1QuadTree.html#a5406ae777fad35102d4e125c10c58dc9", null ],
     [ "Intersect", "classRecast_1_1QuadTree.html#ad0ec3c74cbece66f6585c68166bc4478", null ],
     [ "Intersect", "classRecast_1_1QuadTree.html#a47186d0fb6266fbc16f2436813d312ee", null ],
