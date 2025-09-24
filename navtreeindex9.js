@@ -1,5 +1,7 @@
 var NAVTREEINDEX9 =
 {
+"structSampleToolState.html#ab9dda86ad5ef7d23b6da69dbbc5ded1e":[7,0,132,4],
+"structSampleToolState.html#aba928b81e7813277bfcc6a0854f93658":[7,0,132,1],
 "structTileCacheData.html":[7,0,136],
 "structTileCacheData.html#a101ecb69fccd2046a256900f8c4e6847":[7,0,136,0],
 "structTileCacheData.html#a9c98971270a3a7fe024343b6358dc334":[7,0,136,1],
@@ -247,7 +249,5 @@ var NAVTREEINDEX9 =
 "structimguiGfxText.html#aeed4f7559be7abbfa0b5a49adaedbd0f":[7,0,79,0],
 "structrcChunkyTriMesh.html":[7,0,92],
 "structrcChunkyTriMesh.html#a11e03f096c8d3bcd8a249e6b64fb0502":[7,0,92,0],
-"structrcChunkyTriMesh.html#a1bfb682902d948da8e2f1f575f22dba1":[7,0,92,6],
-"structrcChunkyTriMesh.html#a72fed74ea56cac960cd9eb282e312d87":[7,0,92,5],
-"structrcChunkyTriMesh.html#a93638e22b53882b6bdc700b8c35ecd05":[7,0,92,2]
+"structrcChunkyTriMesh.html#a1bfb682902d948da8e2f1f575f22dba1":[7,0,92,6]
 };

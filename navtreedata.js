@@ -161,12 +161,12 @@ var NAVTREEINDEX =
 "DetourTileCache_8h.html#ac7924ac4ce94c94affdfbe6a07cea976",
 "RecastMesh_8cpp.html#a7779e8ce95da76bac3631db6b39436db",
 "classCrowdToolState.html#a565655ca9441a3df105c266743937f8b",
-"classSample.html#a9e971309f2473d4c4f44226c049f8d9d",
-"classdtFixedArray.html#a33185d41a3c263367ab862014104f89e",
-"functions_func_t.html",
-"md_CHANGELOG.html",
-"structTileCacheData.html",
-"structrcChunkyTriMesh.html#a9d0871acc93ee37e657ab5a39507849b"
+"classSample.html#a9d9a456fbc01f802884f15d87aadeea6",
+"classdtFixedArray.html",
+"functions_func_s.html",
+"main_8cpp.html#adf355327e327a55707483da0fb936165",
+"structSampleToolState.html#ab9dda86ad5ef7d23b6da69dbbc5ded1e",
+"structrcChunkyTriMesh.html#a72fed74ea56cac960cd9eb282e312d87"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

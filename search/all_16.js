@@ -266,7 +266,7 @@ var searchData=
   ['resetmovetarget_263',['resetMoveTarget',['../classdtCrowd.html#a81405dee71882d0a21a4defd6087a270',1,'dtCrowd']]],
   ['resettimers_264',['resetTimers',['../classrcContext.html#a2fcc58bb1e29bbb9a7dfb834efff4a6d',1,'rcContext']]],
   ['resettoolstates_265',['resetToolStates',['../classSample.html#acfb792ed987cf946d264461a04683ff7',1,'Sample']]],
-  ['resize_266',['resize',['../classrcVectorBase.html#a7b39b29cfdec8a9cd2aca4a7f0f7a675',1,'rcVectorBase::resize(rcSizeType size)'],['../classrcVectorBase.html#a1cb229e5cbe8e798fe216393f2f0f327',1,'rcVectorBase::resize(rcSizeType size, const T &amp;value)'],['../structLinearAllocator.html#accc8b1eeda78503beeb05db04bedd4b9',1,'LinearAllocator::resize()']]],
+  ['resize_266',['resize',['../structLinearAllocator.html#accc8b1eeda78503beeb05db04bedd4b9',1,'LinearAllocator::resize()'],['../classrcVectorBase.html#a1cb229e5cbe8e798fe216393f2f0f327',1,'rcVectorBase::resize(rcSizeType size, const T &amp;value)'],['../classrcVectorBase.html#a7b39b29cfdec8a9cd2aca4a7f0f7a675',1,'rcVectorBase::resize(rcSizeType size)']]],
   ['responsibilities_267',['Enforcement Responsibilities',['../md_CODE__OF__CONDUCT.html#enforcement-responsibilities',1,'']]],
   ['restoretilestate_268',['restoreTileState',['../classdtNavMesh.html#aef336a67e552a9d031d669ec84029fb8',1,'dtNavMesh']]],
   ['revisit_20structural_20organization_269',['Revisit structural organization',['../md_Docs_2__99__Roadmap.html#revisit-structural-organization',1,'']]],
@@ -275,8 +275,9 @@ var searchData=
   ['right_5fbottom_272',['RIGHT_BOTTOM',['../QuadTree_8h.html#a02576b0c79a9a63d7a39e09a76261151',1,'QuadTree.h']]],
   ['right_5ftop_273',['RIGHT_TOP',['../QuadTree_8h.html#a148549818fbd1943914eef313ff53852',1,'QuadTree.h']]],
   ['roadmap_274',['Development Roadmap',['../md_Docs_2__99__Roadmap.html',1,'']]],
-  ['rotaux_275',['rotAux',['../structdtObstacleOrientedBox.html#a458dd50502225f6b7070f9cad93c537b',1,'dtObstacleOrientedBox']]],
-  ['rtti_20c_2011_20my_20favorite_20c_20feature_276',['Why doesn&apos;t Recast use STL/Exceptions/RTTI/C++11/my favorite C++ feature?',['../md_Docs_2__3__FAQ.html#why-doesnt-recast-use-stlexceptionsrttic11my-favorite-c-feature',1,'']]],
-  ['running_20unit_20tests_277',['Running Unit tests',['../md_Docs_2__2__BuildingAndIntegrating.html#running-unit-tests',1,'']]],
-  ['rverts_278',['rverts',['../structrcContour.html#a4875d6bf00efae95009d0fe8ccb1f0e9',1,'rcContour']]]
+  ['rotateaxis_275',['rotateAxis',['../main_8cpp.html#aa4153854a60c98c5c0928820ad7429e9',1,'main.cpp']]],
+  ['rotaux_276',['rotAux',['../structdtObstacleOrientedBox.html#a458dd50502225f6b7070f9cad93c537b',1,'dtObstacleOrientedBox']]],
+  ['rtti_20c_2011_20my_20favorite_20c_20feature_277',['Why doesn&apos;t Recast use STL/Exceptions/RTTI/C++11/my favorite C++ feature?',['../md_Docs_2__3__FAQ.html#why-doesnt-recast-use-stlexceptionsrttic11my-favorite-c-feature',1,'']]],
+  ['running_20unit_20tests_278',['Running Unit tests',['../md_Docs_2__2__BuildingAndIntegrating.html#running-unit-tests',1,'']]],
+  ['rverts_279',['rverts',['../structrcContour.html#a4875d6bf00efae95009d0fe8ccb1f0e9',1,'rcContour']]]
 ];
