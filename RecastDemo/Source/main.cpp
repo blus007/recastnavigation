@@ -70,6 +70,24 @@ static const int g_nsamples = sizeof(g_samples) / sizeof(SampleItem);
 bool g_showBlock = true;
 bool g_showBlockName = false;
 
+#include <GL/gl.h>
+
+void rotateAxis(GLdouble matrix[16], double x, double y, double z,
+	double& resultX, double& resultY, double& resultZ) 
+{
+	double homogeneousPoint[4] = { x, y, z, 1.0 };
+	double transformedPoint[4] = { 0.0, 0.0, 0.0, 0.0 };
+
+	for (int i = 0; i < 4; ++i) {
+		for (int j = 0; j < 4; ++j) {
+			transformedPoint[i] += matrix[i + j * 4] * homogeneousPoint[j];
+		}
+	}
+	resultX = transformedPoint[0];
+	resultY = transformedPoint[1];
+	resultZ = transformedPoint[2];
+}
+
 int main(int /*argc*/, char** /*argv*/)
 {
 	// Init SDL
@@ -455,6 +473,8 @@ int main(int /*argc*/, char** /*argv*/)
 		glLoadIdentity();
 		glRotatef(cameraEulers[0], 1, 0, 0);
 		glRotatef(cameraEulers[1], 0, 1, 0);
+		GLdouble cameraRotateMatrix[16];
+		glGetDoublev(GL_MODELVIEW_MATRIX, cameraRotateMatrix);
 		glTranslatef(-cameraPos[0], -cameraPos[1], -cameraPos[2]);
 		GLdouble modelviewMatrix[16];
 		glGetDoublev(GL_MODELVIEW_MATRIX, modelviewMatrix);
@@ -535,6 +555,49 @@ int main(int /*argc*/, char** /*argv*/)
 		{
 			const char msg[] = "W/S/A/D: Move  RMB: Rotate";
 			imguiDrawText(280, height-20, IMGUI_ALIGN_LEFT, msg, imguiRGBA(255,255,255,128));
+		}
+
+		// Axis
+		if (showMenu)
+		{
+			const double factor = 20.0;
+			double centerX = width - 290;
+			double centerY = height - 50;
+
+			double axisXx, axisXy, axisXz;
+			rotateAxis(cameraRotateMatrix, factor, 0.0, 0.0, axisXx, axisXy, axisXz);
+			double axisYx, axisYy, axisYz;
+			rotateAxis(cameraRotateMatrix, 0.0, factor, 0.0, axisYx, axisYy, axisYz);
+			double axisZx, axisZy, axisZz;
+			rotateAxis(cameraRotateMatrix, 0.0, 0.0, factor, axisZx, axisZy, axisZz);
+
+			const int AXIS_X = 0, AXIS_Y = 1, AXIS_Z = 2;
+			const double xs[3] = { axisXx, axisYx, axisZx };
+			const double ys[3] = { axisXy, axisYy, axisZy };
+			const double zs[3] = { axisXz, axisYz, axisZz };
+			const unsigned int colors[3] = { imguiRGBA(255, 0, 0, 255), imguiRGBA(0, 255, 0, 255), imguiRGBA(0, 0, 255, 255) };
+			int orders[3] = { AXIS_X, AXIS_Y, AXIS_Z };
+			for (int i = 0; i < 2; ++i)
+			{
+				for (int j = i + 1; j < 3; ++j)
+				{
+					int baseOrder = orders[i];
+					int cmpOrder = orders[j];
+					if (zs[baseOrder] > zs[cmpOrder])
+					{
+						int temp = orders[i];
+						orders[i] = orders[j];
+						orders[j] = temp;
+					}
+				}
+			}
+			for (int i = 0; i < 3; ++i)
+			{
+				int order = orders[i];
+				float x = centerX + xs[order];
+				float y = centerY + ys[order];
+				imguiDrawLine(centerX, centerY, x, y, 1.0f, colors[order]);
+			}
 		}
 		
 		if (showMenu)

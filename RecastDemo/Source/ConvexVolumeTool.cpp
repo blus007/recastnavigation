@@ -61,7 +61,8 @@ inline bool left(const float* a, const float* b, const float* c)
 	return u1 * v2 - v1 * u2 < 0;
 }
 
-// Returns true if 'a' is more lower-left than 'b'.
+// right hand, x is left, z is forward
+// Returns true if 'a' is more right-lower than 'b'.
 inline bool cmppt(const float* a, const float* b)
 {
 	if (a[0] < b[0]) return true;
@@ -70,6 +71,8 @@ inline bool cmppt(const float* a, const float* b)
 	if (a[2] > b[2]) return false;
 	return false;
 }
+// right hand, x is left, z is forward
+// counter clockwise
 // Calculates convex hull on xz-plane of points on 'pts',
 // stores the indices of the resulting hull in 'out' and
 // returns number of points on hull.
@@ -384,27 +387,27 @@ void ConvexVolumeTool::handleClick(const float* /*s*/, const float* p, bool shif
             return;
         }
 		// Delete
-		int nearestIndex = -1;
-		const ConvexVolume* vols = geom->getConvexVolumes();
-        const ConvexVolume* vol = nullptr;
-		for (int i = 0; i < geom->getConvexVolumeCount(); ++i)
+		const std::list<ConvexVolume*>& vols = geom->getConvexVolumes();
+		const ConvexVolume* vol = nullptr;
+		for (auto it = vols.begin(); it != vols.end(); ++it)
 		{
-			if (pointInPoly(vols[i].nverts, vols[i].verts, p) &&
-							p[1] >= vols[i].hmin && p[1] <= vols[i].hmax)
+			const ConvexVolume* cur = *it;
+			if (pointInPoly(cur->nverts, cur->verts, p) &&
+							p[1] >= cur->hmin && p[1] <= cur->hmax)
 			{
-				nearestIndex = i;
-                vol = vols + i;
+                vol = cur;
+				break;
 			}
 		}
 		// If end point close enough, delete it.
-		if (nearestIndex != -1)
+		if (vol)
 		{
             for (int i = 0; i < vol->linkCount; ++i)
             {
                 int volumeId = getLinkVolumeId(vol->links[i]);
                 unlinkRegion(vol->id, volumeId, true);
             }
-			geom->deleteConvexVolume(nearestIndex);
+			geom->deleteConvexVolume(vol);
 		}
 	}
 	else
@@ -414,13 +417,15 @@ void ConvexVolumeTool::handleClick(const float* /*s*/, const float* p, bool shif
         int id = (int)(m_id + 0.3f);
         if (m_creationType == CONVEX_CREATION_DOOR)
         {
+			// in right hand, x is left, z is forward
+			// counter clockwise
             /*
-             2    1
+             1    2
              ------
              |    |
              |    |
              ------
-             3    0
+             0    3
              */
             const float PI = 3.14159f;
             // x vector
@@ -624,11 +629,10 @@ const ConvexVolume* ConvexVolumeTool::findRegion(int id)
     InputGeom* geom = m_sample->getInputGeom();
     if (!geom)
         return nullptr;
-    ConvexVolume* volumes = (ConvexVolume*)geom->getConvexVolumes();
-    int volumeCount = geom->getConvexVolumeCount();
-    for (int i = 0; i < volumeCount; ++i)
+	const std::list<ConvexVolume*>& volumes = geom->getConvexVolumes();
+    for (auto it = volumes.begin(); it != volumes.end(); ++it)
     {
-        ConvexVolume* volume = volumes + i;
+        ConvexVolume* volume = *it;
         if (volume->area != SAMPLE_POLYAREA_REGION)
             continue;
         if (volume->id == id)
@@ -648,11 +652,10 @@ void ConvexVolumeTool::linkRegion(int from, int to, int doorId)
         return;
     ConvexVolume* fromVolume = nullptr;
     ConvexVolume* toVolume = nullptr;
-    ConvexVolume* volumes = (ConvexVolume*)geom->getConvexVolumes();
-    int volumeCount = geom->getConvexVolumeCount();
-    for (int i = 0; i < volumeCount; ++i)
+	const std::list<ConvexVolume*>& volumes = geom->getConvexVolumes();
+	for (auto it = volumes.begin(); it != volumes.end(); ++it)
     {
-        ConvexVolume* volume = volumes + i;
+        ConvexVolume* volume = *it;
         if (volume->area != SAMPLE_POLYAREA_REGION)
             continue;
         if (volume->id == from)
@@ -714,11 +717,10 @@ void ConvexVolumeTool::unlinkRegion(int from, int to, bool ignoreFrom)
         return;
     ConvexVolume* fromVolume = nullptr;
     ConvexVolume* toVolume = nullptr;
-    ConvexVolume* volumes = (ConvexVolume*)geom->getConvexVolumes();
-    int volumeCount = geom->getConvexVolumeCount();
-    for (int i = 0; i < volumeCount; ++i)
+	const std::list<ConvexVolume*>& volumes = geom->getConvexVolumes();
+	for (auto it = volumes.begin(); it != volumes.end(); ++it)
     {
-        ConvexVolume* volume = volumes + i;
+        ConvexVolume* volume = *it;
         if (volume->area != SAMPLE_POLYAREA_REGION)
             continue;
         if (volume->id == from)

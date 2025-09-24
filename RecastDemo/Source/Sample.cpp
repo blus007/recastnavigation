@@ -65,10 +65,10 @@ void SampleTool::renderVolumes(Sample* sample, double* proj, double* model, int*
         {
             const int BUFF_SIZE = 512;
             char buff[BUFF_SIZE];
-            const ConvexVolume* vols = geom->getConvexVolumes();
-            for (int i = 0; i < volumeCount; ++i)
+			const std::list<ConvexVolume*>& vols = geom->getConvexVolumes();
+			for (auto it = vols.begin(); it != vols.end(); ++it)
             {
-                const ConvexVolume* vol = &vols[i];
+                const ConvexVolume* vol = *it;
 				if (vol->area == SAMPLE_POLYAREA_BLOCK && (!g_showBlock || !g_showBlockName))
 					continue;
                 const float* verts = vol->verts;
@@ -580,36 +580,34 @@ void Sample::saveDoor()
 	std::string volumeName = getFileName(mesh->getFileName());
 	snprintf(buffer, maxSize, "Output/%s.door", volumeName.c_str());
 	FILE* file = fopen(buffer, "w");
-	const ConvexVolume* volumes = geom->getConvexVolumes();
+	const std::list<ConvexVolume*>& volumes = geom->getConvexVolumes();
 	int volumeCount = geom->getConvexVolumeCount();
 	const int area = SAMPLE_POLYAREA_DOOR;
-	std::vector<int> indices;
-	for (int i = 0; i < volumeCount; ++i)
+	std::vector<const ConvexVolume*> doors;
+	for (auto it = volumes.begin(); it != volumes.end(); ++it)
 	{
-		if (volumes[i].area != area)
+		const ConvexVolume* vol = *it;
+		if (vol->area != area)
 			continue;
-		indices.push_back(i);
+		doors.push_back(vol);
 	}
-	if (indices.empty())
+	if (doors.empty())
 	{
 		fclose(file);
 		return;
 	}
-	if (indices.size() > 1)
+	if (doors.size() > 1)
 	{
-		std::sort(indices.begin(), indices.end(), [&](int a, int b) {
-			const ConvexVolume* va = volumes + a;
-			const ConvexVolume* vb = volumes + b;
-			return va->id < vb->id;
+		std::sort(doors.begin(), doors.end(), [&](const ConvexVolume* a, const ConvexVolume* b) {
+			return a->id < b->id;
 		});
 	}
 	nlohmann::json data;
 	data["volumes"] = nlohmann::json::array();
-	for (int i = 0; i < indices.size(); ++i)
+	for (int i = 0; i < doors.size(); ++i)
 	{
 		int size = 0;
-		const int index = indices[i];
-		const ConvexVolume* volume = &volumes[index];
+		const ConvexVolume* volume = doors[i];
 
 		nlohmann::json item = nlohmann::json::object();
 		item["id"] = volume->id;
@@ -688,27 +686,26 @@ void Sample::saveRegion()
 	std::string volumeName = getFileName(mesh->getFileName());
 	snprintf(buffer, maxSize, "Output/%s.region", volumeName.c_str());
 	FILE* file = fopen(buffer, "w");
-	const ConvexVolume* volumes = geom->getConvexVolumes();
+	const std::list<ConvexVolume*>& volumes = geom->getConvexVolumes();
 	int volumeCount = geom->getConvexVolumeCount();
 	const int area = SAMPLE_POLYAREA_REGION;
-	std::vector<int> indices;
-	for (int i = 0; i < volumeCount; ++i)
+	std::vector<ConvexVolume*> regions;
+	for (auto it = volumes.begin(); it != volumes.end(); ++it)
 	{
-		if (volumes[i].area != area)
+		ConvexVolume* vol = *it;
+		if (vol->area != area)
 			continue;
-		indices.push_back(i);
+		regions.push_back(vol);
 	}
-	if (indices.empty())
+	if (regions.empty())
 	{
 		fclose(file);
 		return;
 	}
-	if (indices.size() > 1)
+	if (regions.size() > 1)
 	{
-		std::sort(indices.begin(), indices.end(), [&](int a, int b) {
-			const ConvexVolume* va = volumes + a;
-			const ConvexVolume* vb = volumes + b;
-			return va->id < vb->id;
+		std::sort(regions.begin(), regions.end(), [&](const ConvexVolume* a, const ConvexVolume* b) {
+			return a->id < b->id;
 		});
 	}
 	nlohmann::json data;
@@ -721,9 +718,9 @@ void Sample::saveRegion()
 		float maxX = -HUGE_VALF;
 		float minZ = HUGE_VALF;
 		float maxZ = -HUGE_VALF;
-		for (int i = 0; i < indices.size(); ++i)
+		for (int i = 0; i < regions.size(); ++i)
 		{
-			ConvexVolume* v = (ConvexVolume*)volumes + indices[i];
+			ConvexVolume* v = regions[i];
 			v->CalcAABB();
 			for (int j = 0; j < v->nverts; ++j)
 			{
@@ -735,13 +732,13 @@ void Sample::saveRegion()
 				maxZ = maxZ > z ? maxZ : z;
 			}
 		}
-		elems.resize(indices.size());
+		elems.resize(regions.size());
 		float width = maxX - minX;
 		float height = maxZ - minZ;
 		tree.Init(minX - 1, minZ - 1, width + 1, height + 1);
-		for (int i = 0; i < indices.size(); ++i)
+		for (int i = 0; i < regions.size(); ++i)
 		{
-			ConvexVolume* v = (ConvexVolume*)volumes + indices[i];
+			ConvexVolume* v = regions[i];
 			elems[i] = tree.Add(v);
 		}
 		data["info"]["x"] = minX;
@@ -749,11 +746,10 @@ void Sample::saveRegion()
 		data["info"]["width"] = width;
 		data["info"]["height"] = height;
 	}
-	for (int i = 0; i < indices.size(); ++i)
+	for (int i = 0; i < regions.size(); ++i)
 	{
 		int size = 0;
-		const int index = indices[i];
-		const ConvexVolume* volume = &volumes[index];
+		const ConvexVolume* volume = regions[i];
 
 		nlohmann::json item = nlohmann::json::object();
 		item["id"] = volume->id;

@@ -452,8 +452,8 @@ void NavMeshTesterTool::findPoly()
     if (!geom->getConvexVolumeCount())
         return;
     resetDoor();
-    const ConvexVolume* vols = geom->getConvexVolumes();
-    const ConvexVolume& vol = vols[0];
+	const std::list<ConvexVolume*>& vols = geom->getConvexVolumes();
+    const ConvexVolume& vol = *vols.front();
     float centerPos[3] = {0,0,0};
     const float* firstVert = &vol.verts[0];
     float min[3] = {firstVert[0],firstVert[1],firstVert[2]};

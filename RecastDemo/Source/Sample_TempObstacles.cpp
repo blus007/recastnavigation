@@ -409,14 +409,13 @@ int Sample_TempObstacles::rasterizeTileLayers(
 	}
 	
 	// (Optional) Mark areas.
-	const ConvexVolume* vols = m_geom->getConvexVolumes();
-	for (int i  = 0; i < m_geom->getConvexVolumeCount(); ++i)
+	const std::list<ConvexVolume*>& volumes = m_geom->getConvexVolumes();
+	for (auto it = volumes.begin(); it != volumes.end(); ++it)
 	{
-        if (vols[i].area == SAMPLE_POLYAREA_DOOR || vols[i].area == SAMPLE_POLYAREA_BLOCK)
+		const ConvexVolume* vol = *it;
+        if (vol->area == SAMPLE_POLYAREA_DOOR || vol->area == SAMPLE_POLYAREA_BLOCK)
         {
-            rcMarkConvexPolyArea(m_ctx, vols[i].verts, vols[i].nverts,
-                                 vols[i].hmin, vols[i].hmax,
-                                 (unsigned char)vols[i].area, *rc.chf);
+            rcMarkConvexPolyArea(m_ctx, vol->verts, vol->nverts, vol->hmin, vol->hmax, (unsigned char)vol->area, *rc.chf);
         }
 	}
 	
