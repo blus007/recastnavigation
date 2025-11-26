@@ -176,6 +176,7 @@ NavMeshTesterTool::NavMeshTesterTool() :
 	m_pathFindStatus(DT_FAILURE),
 	m_toolMode(TOOLMODE_PATHFIND_FOLLOW),
 	m_straightPathOptions(0),
+	m_straightPathOptimize(1),
 	m_startRef(0),
 	m_endRef(0),
 	m_npolys(0),
@@ -259,6 +260,12 @@ void NavMeshTesterTool::handleMenu()
 		if (imguiCheck("All", m_straightPathOptions == DT_STRAIGHTPATH_ALL_CROSSINGS))
 		{
 			m_straightPathOptions = DT_STRAIGHTPATH_ALL_CROSSINGS;
+			recalc();
+		}
+		imguiLabel("Optimize path");
+		if (imguiCheck("Optimize", m_straightPathOptimize == 1))
+		{
+			m_straightPathOptimize = m_straightPathOptimize ? 0 : 1;
 			recalc();
 		}
 
@@ -943,6 +950,48 @@ void NavMeshTesterTool::recalc()
 				m_navQuery->findStraightPath(m_spos, epos, m_polys, m_npolys,
 											 m_straightPath, m_straightPathFlags,
 											 m_straightPathPolys, &m_nstraightPath, MAX_POLYS, m_straightPathOptions);
+				if (m_nstraightPath > 2 && m_straightPathOptimize)
+				{
+					int* removes = new int[m_nstraightPath];
+					memset(removes, 0, sizeof(int) * m_nstraightPath);
+					int removeCount = 0;
+					int maxFrom = m_nstraightPath - 2;
+					for (int i = 0; i < maxFrom; ++i)
+					{
+						dtPolyRef fromRef = m_straightPathPolys[i];
+						int j = i + 2;
+						for (; j < m_nstraightPath; ++j)
+						{
+							float t = 0;
+							dtStatus rayStatus = m_navQuery->raycast(fromRef, m_straightPath + i * 3, m_straightPath + j * 3, &m_filter,
+								&t, nullptr, m_polys, &m_npolys, MAX_POLYS);
+							if (dtStatusSucceed(rayStatus) && t > 1)
+							{
+								removes[j - 1] = 1;
+								++removeCount;
+								continue;
+							}
+							break;
+						}
+						i = j - 2;
+					}
+					int count = m_nstraightPath - removeCount;
+					int src = 0;
+					for (int i = 0; i < count; ++i, ++src)
+					{
+						for (; src < m_nstraightPath; ++src)
+						{
+							if (!removes[src])
+								break;
+						}
+						if (i == src)
+							continue;
+						memcpy(m_straightPath + i * 3, m_straightPath + src * 3, sizeof(float) * 3);
+						m_straightPathFlags[i] = m_straightPathFlags[src];
+						m_straightPathPolys[i] = m_straightPathPolys[src];
+					}
+					m_nstraightPath = count;
+				}
 			}
 		}
 		else
