@@ -965,9 +965,17 @@ void Sample_TempObstacles::handleSettings()
 
 	if (imguiButton("Load Configs"))
 	{
-		loadConfigs();
-		loadDoor();
-		loadBlock();
+		try
+		{
+			loadConfigs();
+			loadDoor();
+			loadBlock();
+		}
+		catch (...)
+		{
+			m_ctx->log(RC_LOG_ERROR, "Load Configs failed.");
+			return;
+		}
 	}
 
 	imguiUnindent();
@@ -1619,23 +1627,36 @@ void Sample_TempObstacles::loadConfigs()
 		std::ifstream read(cfgPath);
 		if (!read.is_open())
 			return;
-		nlohmann::json data = nlohmann::json::parse(read);
-		buildSettings.cellSize = data["cellSize"];
-		buildSettings.cellHeight = data["cellHeight"];
-		buildSettings.agentHeight = data["agentHeight"];
-		buildSettings.agentRadius = data["agentRadius"];
-		buildSettings.agentMaxClimb = data["agentMaxClimb"];
-		buildSettings.agentMaxSlope = data["agentMaxSlope"];
-		buildSettings.regionMinSize = data["regionMinSize"];
-		buildSettings.regionMergeSize = data["regionMergeSize"];
-		buildSettings.edgeMaxLen = data["edgeMaxLen"];
-		buildSettings.edgeMaxError = data["edgeMaxError"];
-		buildSettings.vertsPerPoly = data["vertsPerPoly"];
-		buildSettings.detailSampleDist = data["detailSampleDist"];
-		buildSettings.detailSampleMaxError = data["detailSampleMaxError"];
-		buildSettings.partitionType = data["partitionType"];
-		buildSettings.tileSize = data["tileSize"];
-		buildSettings.maxObstacles = data.value("maxObstacles", 20000);
+		try
+		{
+			nlohmann::json data = nlohmann::json::parse(read);
+			buildSettings.cellSize = data.value("cellSize", 0.3f);
+			buildSettings.cellHeight = data.value("cellHeight", 0.2f);
+			buildSettings.agentHeight = data.value("agentHeight", 2.0f);
+			buildSettings.agentRadius = data.value("agentRadius", 0.6f);
+			buildSettings.agentMaxClimb = data.value("agentMaxClimb", 0.9f);
+			buildSettings.agentMaxSlope = data.value("agentMaxSlope", 45.0f);
+			buildSettings.regionMinSize = data.value("regionMinSize", 8.0f);
+			buildSettings.regionMergeSize = data.value("regionMergeSize", 20.0f);
+			buildSettings.edgeMaxLen = data.value("edgeMaxLen", 12.0f);
+			buildSettings.edgeMaxError = data.value("edgeMaxError", 1.3f);
+			buildSettings.vertsPerPoly = data.value("vertsPerPoly", 6.0f);
+			buildSettings.detailSampleDist = data.value("detailSampleDist", 6.0f);
+			buildSettings.detailSampleMaxError = data.value("detailSampleMaxError", 1.0f);
+			buildSettings.partitionType = data.value("partitionType", 0);
+			buildSettings.tileSize = data.value("tileSize", 48);
+			buildSettings.maxObstacles = data.value("maxObstacles", 20000);
+			buildSettings.filterLowHangingObstacles = data.value("filterLowHangingObstacles", true);
+			buildSettings.filterLedgeSpans = data.value("filterLedgeSpans", true);
+			buildSettings.filterWalkableLowHeightSpans = data.value("filterWalkableLowHeightSpans", true);
+		}
+		catch (const std::exception& e)
+		{
+			char message[256];
+			sprintf(message, "Load json config %s.json failed.", meshName.c_str());
+			m_ctx->log(RC_LOG_ERROR, message);
+			throw e;
+		}
 	}
 	loadSettings(buildSettings);
 	handleSettings();

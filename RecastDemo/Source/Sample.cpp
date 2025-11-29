@@ -282,6 +282,9 @@ void Sample::loadSettings(const struct BuildSettings& settings)
 	m_detailSampleDist = settings.detailSampleDist;
 	m_detailSampleMaxError = settings.detailSampleMaxError;
 	m_partitionType = settings.partitionType;
+	m_filterLowHangingObstacles = settings.filterLowHangingObstacles;
+	m_filterLedgeSpans = settings.filterLedgeSpans;
+	m_filterWalkableLowHeightSpans = settings.filterWalkableLowHeightSpans;
 }
 
 void Sample::resetCommonSettings()

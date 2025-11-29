@@ -117,6 +117,12 @@ struct BuildSettings
 	float tileSize;
 	// max obstacles can be placed in map
 	int maxObstacles;
+	// filter low hanging obstacles
+	int filterLowHangingObstacles;
+	// filter ledge spans
+	int filterLedgeSpans;
+	// filter walkable low height spans
+	int filterWalkableLowHeightSpans;
 };
 
 class InputGeom

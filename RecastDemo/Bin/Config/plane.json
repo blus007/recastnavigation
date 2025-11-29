@@ -1,0 +1,21 @@
+{
+	"cellSize" : 0.3,
+	"cellHeight" : 0.2,
+	"agentHeight" : 2,
+	"agentRadius" : 0.6,
+	"agentMaxClimb" : 0.9,
+	"agentMaxSlope" : 45,
+	"regionMinSize" : 8,
+	"regionMergeSize" : 20,
+	"edgeMaxLen" : 12,
+	"edgeMaxError" : 1.3,
+	"vertsPerPoly" : 6,
+	"detailSampleDist" : 6,
+	"detailSampleMaxError" : 1,
+	"partitionType" : 0,
+	"tileSize" : 48,
+	"maxObstacles" : 20000,
+	"filterLowHangingObstacles" : true,
+	"filterLedgeSpans" : true,
+	"filterWalkableLowHeightSpans" : true
+}
