@@ -1,5 +1,8 @@
 var NAVTREEINDEX9 =
 {
+"structSampleToolState.html#a8d13e1c36ea7258da57e022e211d40ae":[7,0,132,3],
+"structSampleToolState.html#aa2dbe87e98b6544ac923398ec93184cf":[7,0,132,5],
+"structSampleToolState.html#ab3c7ab10984d2ca744f28a068d882750":[7,0,132,2],
 "structSampleToolState.html#ab9dda86ad5ef7d23b6da69dbbc5ded1e":[7,0,132,4],
 "structSampleToolState.html#aba928b81e7813277bfcc6a0854f93658":[7,0,132,1],
 "structTileCacheData.html":[7,0,136],
@@ -246,8 +249,5 @@ var NAVTREEINDEX9 =
 "structimguiGfxText.html#a46d1f241b44a57cfc99607b81e97f5b5":[7,0,79,1],
 "structimguiGfxText.html#ad760b02492ffb7f9a1e8a5dcef9d9ba5":[7,0,79,3],
 "structimguiGfxText.html#ad7bf3cc0e24e63d997c335b7a5e15d25":[7,0,79,2],
-"structimguiGfxText.html#aeed4f7559be7abbfa0b5a49adaedbd0f":[7,0,79,0],
-"structrcChunkyTriMesh.html":[7,0,92],
-"structrcChunkyTriMesh.html#a11e03f096c8d3bcd8a249e6b64fb0502":[7,0,92,0],
-"structrcChunkyTriMesh.html#a1bfb682902d948da8e2f1f575f22dba1":[7,0,92,6]
+"structimguiGfxText.html#aeed4f7559be7abbfa0b5a49adaedbd0f":[7,0,79,0]
 };

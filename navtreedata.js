@@ -165,8 +165,8 @@ var NAVTREEINDEX =
 "classdtFixedArray.html",
 "functions_func_s.html",
 "main_8cpp.html#adf355327e327a55707483da0fb936165",
-"structSampleToolState.html#ab9dda86ad5ef7d23b6da69dbbc5ded1e",
-"structrcChunkyTriMesh.html#a72fed74ea56cac960cd9eb282e312d87"
+"structSampleToolState.html#a8d13e1c36ea7258da57e022e211d40ae",
+"structrcChunkyTriMesh.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
