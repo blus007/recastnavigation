@@ -991,6 +991,7 @@ void NavMeshTesterTool::recalc()
 						m_straightPathPolys[i] = m_straightPathPolys[src];
 					}
 					m_nstraightPath = count;
+					delete[] removes;
 				}
 			}
 		}
